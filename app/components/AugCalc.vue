@@ -293,31 +293,11 @@ function deleteTransaction(index: number) {
       </section>
 
       <!-- Sell Modal -->
-      <div v-if="showSellModal.visible" class="modal-overlay">
-        <div class="modal-content">
-          <h3>卖出黄金</h3>
-          <div class="form-group">
-            <label class="form-label">克数 (克)</label>
-            <input v-model="showSellModal.weight" type="number" step="0.0001" min="0" class="form-input" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">单价 (元/克)</label>
-            <input v-model="showSellModal.price" type="number" step="0.0001" min="0" class="form-input" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">手续费 (%)</label>
-            <input v-model="showSellModal.feePercentage" type="number" step="0.01" min="0.3" class="form-input" required>
-          </div>
-          <div class="modal-actions">
-            <button class="cancel-btn" @click="showSellModal.visible = false">
-              取消
-            </button>
-            <button class="confirm-btn" @click="sellTransaction">
-              确认卖出
-            </button>
-          </div>
-        </div>
-      </div>
+      <GoldSellModal
+        v-model:visible="showSellModal.visible"
+        :initial-data="showSellModal"
+        @submit="sellTransaction"
+      />
     </main>
   </div>
 </template>
@@ -404,6 +384,7 @@ body {
 /* 统计卡片样式 */
 .stats-section {
   margin-bottom: 30px;
+  cursor: pointer;
 }
 
 .stats-grid {
@@ -668,5 +649,6 @@ body {
   border: none;
   border-radius: var(--border-radius);
   margin-right: 5px;
+  cursor: pointer;
 }
 </style>
