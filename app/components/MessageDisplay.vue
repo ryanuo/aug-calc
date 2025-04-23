@@ -1,15 +1,15 @@
+<script setup lang="ts">
+// 获取消息、类型和可见性
+const messageStore = useMessageStore()
+</script>
+
 <template>
   <transition name="message-fade">
-    <div v-if="messageStore.isVisible" :class="['message', messageStore.type]" class="message-container">
+    <div v-if="messageStore.isVisible" :class="[messageStore.type]" class="message-container message">
       <p>{{ messageStore.message }}</p>
     </div>
   </transition>
 </template>
-
-<script setup lang="ts">
-// 获取消息、类型和可见性
-const messageStore = useMessageStore();
-</script>
 
 <style scoped>
 .message-container {
@@ -44,7 +44,9 @@ const messageStore = useMessageStore();
 /* 过渡效果 */
 .message-fade-enter-active,
 .message-fade-leave-active {
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease;
 }
 
 .message-fade-enter-from,
