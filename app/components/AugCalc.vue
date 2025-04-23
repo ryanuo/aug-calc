@@ -6,6 +6,7 @@ import { computed, reactive } from 'vue'
 interface ItemTransaction {
   weight: number
   price: number
+  totalPrice: number
   time: string
   profit?: number
   fee?: number
@@ -29,6 +30,7 @@ const sortByTime = reactive({
 const staticData = reactive({
   totalWeight: 0,
   totalProfit: 0,
+  waitSellAvaPrice: 0,
 })
 
 const sortedTransactions = computed(() => {
@@ -53,6 +55,14 @@ watch(() => transactions.value, (newVal) => {
     }
     return sum
   }, 0)
+
+  const totalWaitSellAvaPrice = newVal.reduce((sum, transaction) => {
+    if (!transaction.sell?.price) {
+      sum = new Decimal(sum).plus(transaction.buy.totalPrice).toNumber()
+    }
+    return sum
+  }, 0)
+  staticData.waitSellAvaPrice = Number(new Decimal(totalWaitSellAvaPrice).dividedBy(staticData.totalWeight).toFixed(4))
 }, { immediate: true, deep: true })
 
 function addTransaction() {
@@ -62,6 +72,7 @@ function addTransaction() {
         weight: newTransaction.weight,
         price: newTransaction.price,
         time: new Date().toISOString(),
+        totalPrice: Number(new Decimal(newTransaction.price).times(newTransaction.weight).toFixed(4)),
       },
     })
     newTransaction.weight = 0
@@ -107,6 +118,7 @@ function sellTransaction(e: ShowSellModalType) {
       time: new Date().toISOString(),
       profit,
       fee,
+      totalPrice: Number(new Decimal(e.price).times(e.weight).toFixed(4)),
     }
 
     showSellModal.visible = false
@@ -142,6 +154,14 @@ function deleteTransaction(index: number) {
             </div>
             <div class="stat-value">
               {{ staticData.totalWeight }} 克
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">
+              待卖均价
+            </div>
+            <div class="stat-value">
+              {{ staticData.waitSellAvaPrice }} 克
             </div>
           </div>
           <div class="stat-card">
@@ -192,10 +212,10 @@ function deleteTransaction(index: number) {
           <table class="transactions-table">
             <thead>
               <tr>
-                <th colspan="3" class="buy-header">
+                <th colspan="4" class="buy-header">
                   买入
                 </th>
-                <th colspan="3" class="sell-header">
+                <th colspan="4" class="sell-header">
                   卖出
                 </th>
                 <th colspan="2" class="profit-header">
@@ -213,6 +233,9 @@ function deleteTransaction(index: number) {
                   单价
                 </th>
                 <th class="buy-header">
+                  Total
+                </th>
+                <th class="buy-header">
                   时间
                 </th>
                 <th class="sell-header">
@@ -220,6 +243,9 @@ function deleteTransaction(index: number) {
                 </th>
                 <th class="sell-header">
                   单价
+                </th>
+                <th class="sell-header">
+                  Total
                 </th>
                 <th class="sell-header">
                   时间
@@ -236,15 +262,16 @@ function deleteTransaction(index: number) {
               <tr v-for="(transaction, index) in sortedTransactions" :key="index">
                 <td>{{ transaction.buy?.weight }} 克</td>
                 <td>{{ transaction.buy?.price }} 元</td>
+                <td>{{ transaction.buy?.totalPrice }} 元</td>
                 <td>{{ new Date(transaction.buy!.time).toLocaleString() }}</td>
-                <td>{{ transaction.sell?.weight || '-' }} 克</td>
-                <td>{{ transaction.sell?.price || '-' }} 元</td>
+                <td>{{ transaction.sell?.weight ? `${transaction.sell.weight} 克` : '-' }}</td>
+                <td>{{ transaction.sell?.price ? `${transaction.sell.price} 元` : '-' }}</td>
+                <td>{{ transaction.sell?.totalPrice ? `${transaction.sell.totalPrice} 元` : '-' }}</td>
                 <td>{{ transaction.sell ? new Date(transaction.sell.time).toLocaleString() : '-' }}</td>
-                <td>{{ transaction.sell?.fee || '-' }} 元</td>
+                <td>{{ transaction.sell?.fee ? `${transaction.sell.fee} 元` : '-' }}</td>
                 <td
-                  :class="{ profit: !!transaction?.sell?.profit, loss: transaction.sell?.profit !== 0 && Number(transaction.sell?.profit) < 0 }"
-                >
-                  {{ transaction.sell?.profit || '-' }} 元
+                  :class="{ profit: !!transaction?.sell?.profit, loss: transaction.sell?.profit !== 0 && Number(transaction.sell?.profit) < 0 }">
+                  {{ transaction.sell?.profit ? `${transaction.sell.profit} 元` : '-' }}
                 </td>
                 <td>
                   <button class="sell-btn" @click="openSellModal(index)">
@@ -484,7 +511,7 @@ body {
 .submit-btn,
 .sort-btn,
 .delete-btn {
-  padding: 4px 8px;
+  padding: 2px 8px;
   border: none;
   border-radius: var(--border-radius);
   font-size: 0.8rem;
@@ -627,10 +654,11 @@ body {
 }
 
 .sell-btn {
-  padding: 4px 8px;
+  padding: 2px 8px;
   background-color: var(--warning-color);
   color: white;
   border: none;
+  font-size: 0.8rem;
   border-radius: var(--border-radius);
   margin-right: 5px;
   cursor: pointer;
