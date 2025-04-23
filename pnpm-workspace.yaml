@@ -10,6 +10,7 @@ catalogs:
     '@unocss/nuxt': ^66.1.0-beta.10
     '@vite-pwa/nuxt': ^1.0.0
     '@vueuse/nuxt': ^13.1.0
+    decimal.js: ^10.5.0
     nuxt: ^3.16.2
     unocss: ^66.1.0-beta.10
     unplugin: ^2.2.2
@@ -26,11 +27,9 @@ catalogs:
     '@vueuse/core': ^13.1.0
     pinia: ^3.0.1
     vue: ^3.5.13
-
   icons:
     '@iconify-json/carbon': ^1.2.8
     '@iconify-json/twemoji': ^1.2.2
-
 onlyBuiltDependencies:
   - '@parcel/watcher'
   - esbuild

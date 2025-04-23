@@ -26,6 +26,7 @@
     "@vite-pwa/nuxt": "catalog:build",
     "@vueuse/core": "catalog:frontend",
     "@vueuse/nuxt": "catalog:build",
+    "decimal.js": "catalog:build",
     "eslint": "catalog:dev",
     "eslint-plugin-format": "catalog:dev",
     "nuxt": "catalog:build",
@@ -39,8 +40,5 @@
     "@nuxt/devtools": "catalog:build",
     "unplugin": "catalog:build",
     "vite": "catalog:build"
-  },
-  "dependencies": {
-    "decimal.js": "^10.5.0"
   }
 }

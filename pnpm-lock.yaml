@@ -27,6 +27,9 @@ catalogs:
     '@vueuse/nuxt':
       specifier: ^13.1.0
       version: 13.1.0
+    decimal.js:
+      specifier: ^10.5.0
+      version: 10.5.0
     nuxt:
       specifier: ^3.16.2
       version: 3.16.2
@@ -75,10 +78,6 @@ overrides:
 importers:
 
   .:
-    dependencies:
-      decimal.js:
-        specifier: ^10.5.0
-        version: 10.5.0
     devDependencies:
       '@antfu/eslint-config':
         specifier: catalog:dev
@@ -116,6 +115,9 @@ importers:
       '@vueuse/nuxt':
         specifier: catalog:build
         version: 13.1.0(magicast@0.3.5)(nuxt@3.16.2(@parcel/watcher@2.5.1)(db0@0.3.1)(eslint@9.24.0(jiti@2.4.2))(ioredis@5.6.0)(magicast@0.3.5)(optionator@0.9.4)(rollup@4.37.0)(terser@5.39.0)(typescript@5.8.3)(vite@6.2.5(jiti@2.4.2)(terser@5.39.0)(yaml@2.7.0))(vue-tsc@2.2.8(typescript@5.8.3))(yaml@2.7.0))(vue@3.5.13(typescript@5.8.3))
+      decimal.js:
+        specifier: catalog:build
+        version: 10.5.0
       eslint:
         specifier: catalog:dev
         version: 9.24.0(jiti@2.4.2)
