@@ -18,11 +18,11 @@ catalogs:
 
   dev:
     '@antfu/eslint-config': ^4.11.0
+    '@types/node': ^22.14.1
     eslint: ^9.24.0
     eslint-plugin-format: ^1.0.1
     typescript: ^5.8.3
     vue-tsc: ^2.2.8
-
   frontend:
     '@vueuse/core': ^13.1.0
     pinia: ^3.0.1
