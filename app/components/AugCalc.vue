@@ -270,7 +270,11 @@ function deleteTransaction(index: number) {
                 <td>{{ transaction.sell ? new Date(transaction.sell.time).toLocaleString() : '-' }}</td>
                 <td>{{ transaction.sell?.fee ? `${transaction.sell.fee} 元` : '-' }}</td>
                 <td
-                  :class="{ profit: !!transaction?.sell?.profit, loss: transaction.sell?.profit !== 0 && Number(transaction.sell?.profit) < 0 }">
+                  :class="{
+                    profit: !!transaction?.sell?.profit,
+                    loss: Number(transaction.sell?.profit) < 0,
+                  }"
+                >
                   {{ transaction.sell?.profit ? `${transaction.sell.profit} 元` : '-' }}
                 </td>
                 <td>
