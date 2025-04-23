@@ -1,80 +1,63 @@
-<p align="center">
-<img src="https://user-images.githubusercontent.com/11247099/140462375-7b7ac4db-35b7-453c-8a05-13d8d20282c4.png" width="600"/>
-</p>
+# 黄金交易计算器
 
-<h2 align="center">
-<a href="https://github.com/antfu/vitesse">Vitesse</a> for Nuxt 3
-</h2><br>
+这是一个基于 Vue 3 的黄金交易记录和统计应用。用户可以记录买入和卖出的交易，并实时计算总克数变化、总盈亏和总价值。
 
-<p align="center">
-<br>
-<a href="https://vitesse-nuxt3.netlify.app/">🖥 Online Preview</a>
-<br><br>
-<a href="https://stackblitz.com/github/antfu/vitesse-nuxt"><img src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" alt=""></a>
-</p>
+## 功能
 
-## Features
+- **交易记录**：支持记录买入和卖出的交易。
+- **实时统计**：
+  - 总克数变化
+  - 总盈亏
+  - 总价值
+- **本地存储**：交易记录会保存在浏览器的本地存储中，刷新页面后数据不会丢失。
 
-- 💚 [Nuxt 3](https://nuxt.com/) - SSR, ESR, File-based routing, components auto importing, modules, etc.
+## 技术栈
 
-- ⚡️ Vite - Instant HMR.
+- Vue 3
+- TypeScript
+- VueUse（`useStorage` 用于本地存储）
+- Decimal.js（用于精确的金额计算）
 
-- 🎨 [UnoCSS](https://github.com/unocss/unocss) - The instant on-demand atomic CSS engine.
+## 使用方法
 
-- 😃 Use icons from any icon sets in Pure CSS, powered by [UnoCSS](https://github.com/unocss/unocss).
+1. 克隆项目到本地：
 
-- 🔥 The `<script setup>` syntax.
+   ```bash
+   git clone https://github.com/your-repo/aug-calc.git
+   cd aug-calc
+   ```
 
-- 🍍 [State Management via Pinia](https://github.com/vuejs/pinia), see [./app/composables/user.ts](./app/composables/user.ts).
+2. 安装依赖：
 
-- 📑 [Layout system](./app/layouts).
+   ```bash
+   npm install
+   ```
 
-- 📥 APIs auto importing - for Composition API, VueUse and custom composables.
+3. 启动开发服务器：
 
-- 🏎 Zero-config cloud functions and deploy.
+   ```bash
+   npm run dev
+   ```
 
-- 🦾 TypeScript, of course.
+4. 打开浏览器访问 `http://localhost:3000`。
 
-- 📲 [PWA](https://github.com/vite-pwa/nuxt) with offline support and auto-update behavior.
+## 项目结构
 
-## Plugins
-
-### Nuxt Modules
-
-- [VueUse](https://github.com/vueuse/vueuse) - collection of useful composition APIs.
-- [ColorMode](https://github.com/nuxt-modules/color-mode) - dark and Light mode with auto detection made easy with Nuxt.
-- [UnoCSS](https://github.com/unocss/unocss) - the instant on-demand atomic CSS engine.
-- [Pinia](https://github.com/vuejs/pinia) - intuitive, type safe, light and flexible Store for Vue.
-- [VitePWA](https://github.com/vite-pwa/nuxt) - zero-config PWA Plugin for Nuxt 3.
-- [DevTools](https://github.com/nuxt/devtools) - unleash Nuxt Developer Experience.
-
-## IDE
-
-We recommend using [VS Code](https://code.visualstudio.com/) with [Volar](https://github.com/johnsoncodehk/volar) to get the best experience (You might want to disable [Vetur](https://vuejs.github.io/vetur/) if you have it).
-
-## Variations
-
-- [vitesse](https://github.com/antfu/vitesse) - Opinionated Vite Starter Template
-- [vitesse-lite](https://github.com/antfu/vitesse-lite) - Lightweight version of Vitesse
-- [vitesse-nuxt-bridge](https://github.com/antfu/vitesse-nuxt-bridge) - Vitesse for Nuxt 2 with Bridge
-- [vitesse-webext](https://github.com/antfu/vitesse-webext) - WebExtension Vite starter template
-
-## Try it now!
-
-### Online
-
-<a href="https://stackblitz.com/github/antfu/vitesse-nuxt"><img src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" alt=""></a>
-
-### GitHub Template
-
-[Create a repo from this template on GitHub](https://github.com/antfu/vitesse-nuxt/generate).
-
-### Clone to local
-
-If you prefer to do it manually with the cleaner git history
-
-```bash
-npx degit antfu/vitesse-nuxt my-nuxt-app
-cd my-nuxt-app
-pnpm i # If you don't have pnpm installed, run: npm install -g pnpm
 ```
+/app
+  /components
+    AugCalc.vue  # 主组件，包含交易记录和统计功能
+/README.md       # 项目说明文件
+```
+
+## 截图
+
+![应用截图](https://via.placeholder.com/800x400?text=应用截图)
+
+## 贡献
+
+欢迎提交 Issue 或 Pull Request 来改进本项目。
+
+## 许可证
+
+MIT License
