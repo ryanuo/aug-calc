@@ -10,7 +10,7 @@ const online = useOnline()
   <div>
     <ClientOnly>
       <Suspense>
-        <PageView v-if="online" />
+        <AugCalc v-if="online" />
         <div v-else text-gray:80>
           You're offline
         </div>

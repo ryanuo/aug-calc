@@ -161,7 +161,7 @@ function handleSubmit() {
   margin: 0;
   font-size: 1.4rem;
   font-weight: 600;
-  text-align: center;
+  text-align: left;
 }
 
 .modal-close {
@@ -186,6 +186,7 @@ function handleSubmit() {
 
 .form-group {
   margin-bottom: 20px;
+  text-align: left;
 }
 
 .form-label {

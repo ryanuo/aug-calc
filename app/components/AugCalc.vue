@@ -26,6 +26,11 @@ const sortByTime = reactive({
   ascending: true,
 })
 
+const staticData = reactive({
+  totalWeight: 0,
+  totalProfit: 0,
+})
+
 const sortedTransactions = computed(() => {
   return [...transactions.value].sort((a, b) => {
     const aTime = new Date(a.buy?.time || a.sell?.time || 0).getTime()
@@ -34,50 +39,21 @@ const sortedTransactions = computed(() => {
   })
 })
 
-const totalWeight = computed(() => {
-  return transactions.value.reduce((sum, transaction) => {
-    if (transaction.buy) {
+watch(() => transactions.value, (newVal) => {
+  staticData.totalWeight = newVal.reduce((sum, transaction) => {
+    if (!transaction.sell?.weight) {
       sum = new Decimal(sum).plus(transaction.buy.weight).toNumber()
     }
     return sum
   }, 0)
-})
 
-const totalProfit = computed(() => {
-  return transactions.value.reduce((sum, transaction) => {
+  staticData.totalProfit = newVal.reduce((sum, transaction) => {
     if (transaction.sell?.profit) {
       sum = new Decimal(sum).plus(transaction.sell.profit).toNumber()
     }
     return sum
   }, 0)
-})
-
-const totalValue = computed(() => {
-  return transactions.value.reduce((sum, transaction) => {
-    if (transaction.buy) {
-      sum = new Decimal(sum).plus(new Decimal(transaction.buy.weight).times(transaction.buy.price)).toNumber()
-    }
-    return sum
-  }, 0)
-})
-
-function getAverageBuyPrice(): number {
-  const totalWeights = transactions.value.reduce((sum, transaction) => {
-    if (transaction.buy) {
-      sum = new Decimal(sum).plus(transaction.buy.weight).toNumber()
-    }
-    return sum
-  }, 0)
-
-  const totalPrice = transactions.value.reduce((sum, transaction) => {
-    if (transaction.buy) {
-      sum = new Decimal(sum).plus(new Decimal(transaction.buy.weight).times(transaction.buy.price)).toNumber()
-    }
-    return sum
-  }, 0)
-
-  return totalWeights > 0 ? Number.parseFloat(new Decimal(totalPrice).dividedBy(totalWeights).toFixed(4)) : 0
-}
+}, { immediate: true })
 
 function addTransaction() {
   if (newTransaction.weight > 0 && newTransaction.price > 0) {
@@ -162,34 +138,21 @@ function deleteTransaction(index: number) {
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-label">
-              总克数
+              可卖克数
             </div>
             <div class="stat-value">
-              {{ totalWeight }} 克
+              {{ staticData.totalWeight }} 克
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-label">
               总盈亏
             </div>
-            <div class="stat-value" :class="{ profit: totalProfit > 0, loss: totalProfit < 0 }">
-              {{ totalProfit }} 元
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">
-              总价值
-            </div>
-            <div class="stat-value">
-              {{ totalValue }} 元
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">
-              平均买入价
-            </div>
-            <div class="stat-value">
-              {{ getAverageBuyPrice() }} 元/克
+            <div
+              class="stat-value"
+              :class="{ profit: staticData.totalProfit > 0, loss: staticData.totalProfit < 0 }"
+            >
+              {{ staticData.totalProfit }} 元
             </div>
           </div>
         </div>
