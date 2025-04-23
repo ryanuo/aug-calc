@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { defineEmits, defineProps, ref, watch } from 'vue'
+import { FEEPROCENTAGE } from '~/constants'
 
 const props = defineProps({
   visible: {
@@ -32,10 +33,18 @@ watch(() => props.initialData, (newVal) => {
 function closeModal() {
   emit('update:visible', false)
 }
+const { showMessage } = useMessageStore();
 
 function handleSubmit() {
-  emit('submit', formData.value)
-  closeModal()
+  if (formData.value.weight > props.initialData.weight) {
+    showMessage({
+      t: 'error',
+      message: '卖出克数不能大于持有克数',
+    })
+  } else {
+    emit('submit', formData.value)
+    closeModal()
+  }
 }
 </script>
 
@@ -55,41 +64,20 @@ function handleSubmit() {
         <div class="modal-body">
           <div class="form-group">
             <label class="form-label">克数 (克)</label>
-            <input
-              v-model="formData.weight"
-              type="number"
-              step="0.0001"
-              min="0"
-              class="form-input"
-              placeholder="请输入卖出克数"
-              required
-            >
+            <input v-model="formData.weight" type="number" step="0.0001" min="0" class="form-input"
+              placeholder="请输入卖出克数" required>
           </div>
 
           <div class="form-group">
             <label class="form-label">手续费 (%)</label>
-            <input
-              v-model="formData.feePercentage"
-              type="number"
-              step="0.01"
-              min="0.3"
-              class="form-input"
-              placeholder="0.3"
-              required
-            >
+            <input v-model="formData.feePercentage" type="number" step="0.01" :min="FEEPROCENTAGE.DEFAULT"
+              class="form-input" :placeholder="`${FEEPROCENTAGE.DEFAULT}`" required>
           </div>
 
           <div class="form-group">
             <label class="form-label">单价 (元/克)</label>
-            <input
-              v-model="formData.price"
-              type="number"
-              step="0.0001"
-              min="0"
-              class="form-input"
-              placeholder="请输入当前金价"
-              required
-            >
+            <input v-model="formData.price" type="number" step="0.0001" :min="`${ props.initialData.price }`"
+              class="form-input" placeholder="请输入当前金价" required>
           </div>
         </div>
 

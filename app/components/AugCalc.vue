@@ -2,6 +2,7 @@
 import { useStorage } from '@vueuse/core'
 import Decimal from 'decimal.js'
 import { computed, reactive } from 'vue'
+import { FEEPROCENTAGE } from '~/constants'
 
 interface ItemTransaction {
   weight: number
@@ -93,7 +94,7 @@ const showSellModal = reactive<ShowSellModalType>({
   index: -1,
   weight: 0,
   price: 0,
-  feePercentage: 0.3,
+  feePercentage: FEEPROCENTAGE.DEFAULT,
 })
 
 function openSellModal(index: number) {
@@ -103,7 +104,7 @@ function openSellModal(index: number) {
     showSellModal.index = index
     showSellModal.weight = transaction!.buy.weight
     showSellModal.price = 0
-    showSellModal.feePercentage = 0.3
+    showSellModal.feePercentage = FEEPROCENTAGE.DEFAULT
   }
 }
 
@@ -125,7 +126,7 @@ function sellTransaction(e: ShowSellModalType) {
     showSellModal.index = -1
     showSellModal.weight = 0
     showSellModal.price = 0
-    showSellModal.feePercentage = 0.3
+    showSellModal.feePercentage = FEEPROCENTAGE.DEFAULT
   }
 }
 
@@ -269,12 +270,10 @@ function deleteTransaction(index: number) {
                 <td>{{ transaction.sell?.totalPrice ? `${transaction.sell.totalPrice} 元` : '-' }}</td>
                 <td>{{ transaction.sell ? new Date(transaction.sell.time).toLocaleString() : '-' }}</td>
                 <td>{{ transaction.sell?.fee ? `${transaction.sell.fee} 元` : '-' }}</td>
-                <td
-                  :class="{
-                    profit: !!transaction?.sell?.profit,
-                    loss: Number(transaction.sell?.profit) < 0,
-                  }"
-                >
+                <td :class="{
+                  profit: !!transaction?.sell?.profit,
+                  loss: Number(transaction.sell?.profit) < 0,
+                }">
                   {{ transaction.sell?.profit ? `${transaction.sell.profit} 元` : '-' }}
                 </td>
                 <td>
@@ -295,6 +294,7 @@ function deleteTransaction(index: number) {
       <GoldSellModal v-model:visible="showSellModal.visible" :initial-data="showSellModal" @submit="sellTransaction" />
     </main>
   </div>
+  <MessageDisplay />
 </template>
 
 <style>
@@ -364,9 +364,9 @@ body {
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 20px;
+  padding: 32px;
 }
 
 .header {
