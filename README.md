@@ -52,7 +52,7 @@
 
 ## 截图
 
-![应用截图](https://via.placeholder.com/800x400?text=应用截图)
+![应用截图](/public/screenshot.png)
 
 ## 贡献
 
