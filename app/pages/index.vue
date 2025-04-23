@@ -8,6 +8,7 @@ const online = useOnline()
 
 <template>
   <div>
+    <Nav />
     <ClientOnly>
       <Suspense>
         <AugCalc v-if="online" />

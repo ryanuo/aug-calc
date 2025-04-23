@@ -276,10 +276,22 @@ function deleteTransaction(index: number) {
   --warning-color: #ffc107;
   --info-color: #17a2b8;
   --light-color: #f8f9fa;
-  --dark-color: #343a40;
+  --dark-color: #031528a0;
   --border-radius: 8px;
   --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   --transition: all 0.3s ease;
+}
+
+:root[data-theme='dark'] {
+  --primary-color: #6c757d;
+  --secondary-color: #4a6baf;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #17a2b8;
+  --light-color: #343a40;
+  --dark-color: #f8f9fa;
+  --box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
 }
 
 * {
@@ -291,8 +303,13 @@ function deleteTransaction(index: number) {
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
-  color: #333;
-  background-color: #f5f7fa;
+  color: var(--dark-color);
+  background-color: var(--light-color);
+}
+
+.dark body {
+  color: var(--light-color);
+  background-color: var(--dark-color);
 }
 </style>
 
@@ -362,7 +379,7 @@ body {
 }
 
 .stat-card {
-  background: white;
+  background: var(--light-color);
   border-radius: var(--border-radius);
   padding: 20px;
   box-shadow: var(--box-shadow);
@@ -400,7 +417,7 @@ body {
 }
 
 .transaction-form {
-  background: white;
+  background: var(--light-color);
   border-radius: var(--border-radius);
   padding: 25px;
   box-shadow: var(--box-shadow);
