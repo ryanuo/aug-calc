@@ -30,6 +30,8 @@ const totalValue = computed(() =>
   }, 0),
 )
 
+const sortByTime = reactive({ ascending: true }) // 控制时间排序
+
 function addTransaction() {
   const { type, weight, price } = newTransaction
   const profit
@@ -37,11 +39,29 @@ function addTransaction() {
       ? new Decimal(price).minus(getAverageBuyPrice()).times(weight).toNumber()
       : 0
 
-  transactions.value.push({ type, weight, price, profit })
+  transactions.value.push({
+    type,
+    weight,
+    price,
+    profit,
+    time: new Date().toISOString(), // 添加时间戳
+  })
   newTransaction.type = 'buy'
   newTransaction.weight = 0
   newTransaction.price = 0
 }
+
+function deleteTransaction(index: number) {
+  transactions.value.splice(index, 1) // 删除指定交易
+}
+
+const sortedTransactions = computed(() => {
+  return [...transactions.value].sort((a, b) => {
+    return sortByTime.ascending
+      ? new Date(a.time).getTime() - new Date(b.time).getTime()
+      : new Date(b.time).getTime() - new Date(a.time).getTime()
+  })
+})
 
 function getAverageBuyPrice() {
   const buyTransactions = transactions.value.filter(t => t.type === 'buy')
@@ -109,6 +129,9 @@ function getAverageBuyPrice() {
     </form>
 
     <h2>交易记录</h2>
+    <button @click="sortByTime.ascending = !sortByTime.ascending">
+      按时间排序 {{ sortByTime.ascending ? '升序' : '降序' }}
+    </button>
     <table>
       <thead>
         <tr>
@@ -116,15 +139,23 @@ function getAverageBuyPrice() {
           <th>克数</th>
           <th>单价</th>
           <th>盈利</th>
+          <th>时间</th>
+          <th>操作</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(transaction, index) in transactions" :key="index">
+        <tr v-for="(transaction, index) in sortedTransactions" :key="index">
           <td>{{ transaction.type === 'buy' ? '买入' : '卖出' }}</td>
           <td>{{ transaction.weight }}</td>
           <td>{{ transaction.price }}</td>
           <td :class="{ profit: transaction.profit > 0, loss: transaction.profit < 0 }">
             {{ transaction.profit }}
+          </td>
+          <td>{{ new Date(transaction.time).toLocaleString() }}</td>
+          <td>
+            <button @click="deleteTransaction(index)">
+              删除
+            </button>
           </td>
         </tr>
       </tbody>
