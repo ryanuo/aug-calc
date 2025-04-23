@@ -1,82 +1,142 @@
 <script setup lang="ts">
-import { useStorage } from '@vueuse/core' // 引入 useStorage
-import Decimal from 'decimal.js' // 引入金额计算库
+import { useStorage } from '@vueuse/core'
+import Decimal from 'decimal.js'
 import { computed, reactive } from 'vue'
 
-const transactions = useStorage<any[]>('transactions', []) // 使用 useStorage 替代本地存储
+interface ItemTransaction {
+  weight: number
+  price: number
+  time: string
+  profit?: number
+  fee?: number
+}
+
+interface Transaction {
+  buy: ItemTransaction
+  sell?: ItemTransaction
+}
+
+const transactions = useStorage<Transaction[]>('transactions', [])
+
 const newTransaction = reactive({
-  type: 'buy',
   weight: 0,
   price: 0,
 })
 
-const totalWeight = computed(() =>
-  transactions.value.reduce((sum, t) => {
-    return t.type === 'buy'
-      ? new Decimal(sum).plus(t.weight).toDecimalPlaces(4).toNumber()
-      : new Decimal(sum).minus(t.weight).toDecimalPlaces(4).toNumber()
-  }, 0),
-)
-
-const totalProfit = computed(() =>
-  transactions.value.reduce((sum, t) =>
-    new Decimal(sum).plus(t.profit).toDecimalPlaces(4).toNumber(), 0),
-)
-
-const totalValue = computed(() =>
-  transactions.value.reduce((sum, t) => {
-    return t.type === 'buy'
-      ? new Decimal(sum).plus(new Decimal(t.weight).times(t.price)).toDecimalPlaces(4).toNumber()
-      : sum
-  }, 0),
-)
-
-const sortByTime = reactive({ ascending: true }) // 控制时间排序
-
-function addTransaction() {
-  const { type, weight, price } = newTransaction
-  const profit = type === 'sell'
-    ? new Decimal(price).minus(getAverageBuyPrice()).times(weight).toDecimalPlaces(4).toNumber()
-    : 0
-
-  transactions.value.push({
-    type,
-    weight: new Decimal(weight).toDecimalPlaces(4).toNumber(),
-    price: new Decimal(price).toDecimalPlaces(4).toNumber(),
-    profit,
-    time: new Date().toISOString(), // 添加时间戳
-  })
-  newTransaction.type = 'buy'
-  newTransaction.weight = 0
-  newTransaction.price = 0
-}
-
-function deleteTransaction(index: number) {
-  transactions.value.splice(index, 1) // 删除指定交易
-}
+const sortByTime = reactive({
+  ascending: true,
+})
 
 const sortedTransactions = computed(() => {
   return [...transactions.value].sort((a, b) => {
-    return sortByTime.ascending
-      ? new Date(a.time).getTime() - new Date(b.time).getTime()
-      : new Date(b.time).getTime() - new Date(a.time).getTime()
+    const aTime = new Date(a.buy?.time || a.sell?.time || 0).getTime()
+    const bTime = new Date(b.buy?.time || b.sell?.time || 0).getTime()
+    return sortByTime.ascending ? aTime - bTime : bTime - aTime
   })
 })
 
-function getAverageBuyPrice() {
-  const buyTransactions = transactions.value.filter(t => t.type === 'buy')
-  const totalWeight = buyTransactions.reduce(
-    (sum, t) => new Decimal(sum).plus(t.weight).toDecimalPlaces(4).toNumber(),
-    0,
-  )
-  const totalCost = buyTransactions.reduce(
-    (sum, t) =>
-      new Decimal(sum).plus(new Decimal(t.weight).times(t.price)).toDecimalPlaces(4).toNumber(),
-    0,
-  )
-  return totalWeight > 0
-    ? new Decimal(totalCost).dividedBy(totalWeight).toDecimalPlaces(4).toNumber()
-    : 0
+const totalWeight = computed(() => {
+  return transactions.value.reduce((sum, transaction) => {
+    if (transaction.buy) {
+      sum = new Decimal(sum).plus(transaction.buy.weight).toNumber()
+    }
+    return sum
+  }, 0)
+})
+
+const totalProfit = computed(() => {
+  return transactions.value.reduce((sum, transaction) => {
+    if (transaction.sell?.profit) {
+      sum = new Decimal(sum).plus(transaction.sell.profit).toNumber()
+    }
+    return sum
+  }, 0)
+})
+
+const totalValue = computed(() => {
+  return transactions.value.reduce((sum, transaction) => {
+    if (transaction.buy) {
+      sum = new Decimal(sum).plus(new Decimal(transaction.buy.weight).times(transaction.buy.price)).toNumber()
+    }
+    return sum
+  }, 0)
+})
+
+function getAverageBuyPrice(): number {
+  const totalWeights = transactions.value.reduce((sum, transaction) => {
+    if (transaction.buy) {
+      sum = new Decimal(sum).plus(transaction.buy.weight).toNumber()
+    }
+    return sum
+  }, 0)
+
+  const totalPrice = transactions.value.reduce((sum, transaction) => {
+    if (transaction.buy) {
+      sum = new Decimal(sum).plus(new Decimal(transaction.buy.weight).times(transaction.buy.price)).toNumber()
+    }
+    return sum
+  }, 0)
+
+  return totalWeights > 0 ? Number.parseFloat(new Decimal(totalPrice).dividedBy(totalWeights).toFixed(4)) : 0
+}
+
+function addTransaction() {
+  if (newTransaction.weight > 0 && newTransaction.price > 0) {
+    transactions.value.push({
+      buy: {
+        weight: newTransaction.weight,
+        price: newTransaction.price,
+        time: new Date().toISOString(),
+      },
+    })
+    newTransaction.weight = 0
+    newTransaction.price = 0
+  }
+}
+
+const showSellModal = reactive({
+  visible: false,
+  index: -1,
+  weight: 0,
+  price: 0,
+  feePercentage: 0.3,
+})
+
+function openSellModal(index: number) {
+  const transaction = transactions.value[index]
+  if (transaction!.buy) {
+    showSellModal.visible = true
+    showSellModal.index = index
+    showSellModal.weight = transaction!.buy.weight
+    showSellModal.price = 0
+    showSellModal.feePercentage = 0.3
+  }
+}
+
+function sellTransaction() {
+  const transaction = transactions.value[showSellModal.index]
+  if (transaction && transaction.buy) {
+    const fee = new Decimal(showSellModal.price).times(showSellModal.weight).times(showSellModal.feePercentage).dividedBy(100).toNumber()
+    const profit = new Decimal(showSellModal.price).times(showSellModal.weight).minus(new Decimal(transaction.buy.price).times(showSellModal.weight)).minus(fee).toNumber()
+
+    transaction.sell = {
+      weight: showSellModal.weight,
+      price: showSellModal.price,
+      time: new Date().toISOString(),
+      profit,
+      fee,
+    }
+
+    showSellModal.visible = false
+    showSellModal.index = -1
+    showSellModal.weight = 0
+    showSellModal.price = 0
+    showSellModal.feePercentage = 0.3
+  }
+}
+
+function deleteTransaction(index: number) {
+  transactions.value.splice(index, 1)
 }
 </script>
 
@@ -96,7 +156,7 @@ function getAverageBuyPrice() {
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-label">
-              总克数变化
+              总克数
             </div>
             <div class="stat-value">
               {{ totalWeight }} 克
@@ -131,24 +191,10 @@ function getAverageBuyPrice() {
 
       <section class="form-section">
         <h2 class="section-title">
-          ➕ 添加交易
+          ➕ 添加买入记录
         </h2>
         <form class="transaction-form" @submit.prevent="addTransaction">
           <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">交易类型</label>
-              <div class="radio-group">
-                <label class="radio-option" :class="{ active: newTransaction.type === 'buy' }">
-                  <input v-model="newTransaction.type" type="radio" value="buy" class="radio-input">
-                  <span class="radio-label">买入</span>
-                </label>
-                <label class="radio-option" :class="{ active: newTransaction.type === 'sell' }">
-                  <input v-model="newTransaction.type" type="radio" value="sell" class="radio-input">
-                  <span class="radio-label">卖出</span>
-                </label>
-              </div>
-            </div>
-
             <div class="form-group">
               <label class="form-label">克数 (克)</label>
               <input v-model="newTransaction.weight" type="number" step="0.0001" min="0" class="form-input" required>
@@ -160,7 +206,7 @@ function getAverageBuyPrice() {
             </div>
 
             <button type="submit" class="submit-btn">
-              添加交易
+              添加买入
             </button>
           </div>
         </form>
@@ -180,26 +226,62 @@ function getAverageBuyPrice() {
           <table class="transactions-table">
             <thead>
               <tr>
-                <th>类型</th>
-                <th>克数</th>
-                <th>单价</th>
-                <th>盈利</th>
-                <th>时间</th>
-                <th>操作</th>
+                <th colspan="3" class="buy-header">
+                  买入
+                </th>
+                <th colspan="3" class="sell-header">
+                  卖出
+                </th>
+                <th colspan="2" class="profit-header">
+                  收益
+                </th>
+                <th rowspan="2">
+                  操作
+                </th>
+              </tr>
+              <tr>
+                <th class="buy-header">
+                  克数
+                </th>
+                <th class="buy-header">
+                  单价
+                </th>
+                <th class="buy-header">
+                  时间
+                </th>
+                <th class="sell-header">
+                  克数
+                </th>
+                <th class="sell-header">
+                  单价
+                </th>
+                <th class="sell-header">
+                  时间
+                </th>
+                <th class="profit-header">
+                  手续费
+                </th>
+                <th class="profit-header">
+                  盈利
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(transaction, index) in sortedTransactions" :key="index">
-                <td :class="{ 'buy-type': transaction.type === 'buy', 'sell-type': transaction.type === 'sell' }">
-                  {{ transaction.type === 'buy' ? '买入' : '卖出' }}
+                <td>{{ transaction.buy?.weight }} 克</td>
+                <td>{{ transaction.buy?.price }} 元</td>
+                <td>{{ new Date(transaction.buy!.time).toLocaleString() }}</td>
+                <td>{{ transaction.sell?.weight || '-' }} 克</td>
+                <td>{{ transaction.sell?.price || '-' }} 元</td>
+                <td>{{ transaction.sell ? new Date(transaction.sell.time).toLocaleString() : '-' }}</td>
+                <td>{{ transaction.sell?.fee || '-' }} 元</td>
+                <td :class="{ profit: !!transaction?.sell?.profit, loss: transaction.sell?.profit !== 0 && Number(transaction.sell?.profit) < 0 }">
+                  {{ transaction.sell?.profit || '-' }} 元
                 </td>
-                <td>{{ transaction.weight }} 克</td>
-                <td>{{ transaction.price }} 元</td>
-                <td :class="{ profit: transaction.profit > 0, loss: transaction.profit < 0 }">
-                  {{ transaction.profit || '-' }} 元
-                </td>
-                <td>{{ new Date(transaction.time).toLocaleString() }}</td>
                 <td>
+                  <button class="sell-btn" @click="openSellModal(index)">
+                    卖出
+                  </button>
                   <button class="delete-btn" @click="deleteTransaction(index)">
                     删除
                   </button>
@@ -209,6 +291,33 @@ function getAverageBuyPrice() {
           </table>
         </div>
       </section>
+
+      <!-- Sell Modal -->
+      <div v-if="showSellModal.visible" class="modal-overlay">
+        <div class="modal-content">
+          <h3>卖出黄金</h3>
+          <div class="form-group">
+            <label class="form-label">克数 (克)</label>
+            <input v-model="showSellModal.weight" type="number" step="0.0001" min="0" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">单价 (元/克)</label>
+            <input v-model="showSellModal.price" type="number" step="0.0001" min="0" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">手续费 (%)</label>
+            <input v-model="showSellModal.feePercentage" type="number" step="0.01" min="0.3" class="form-input" required>
+          </div>
+          <div class="modal-actions">
+            <button class="cancel-btn" @click="showSellModal.visible = false">
+              取消
+            </button>
+            <button class="confirm-btn" @click="sellTransaction">
+              确认卖出
+            </button>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 </template>
@@ -244,6 +353,21 @@ body {
 </style>
 
 <style scoped>
+.buy-header {
+  background-color: var(--success-color) !important; /* 买入背景颜色 */
+  opacity: 0.5;
+}
+
+.sell-header {
+  background-color: var(--danger-color) !important; /* 卖出背景颜色 */
+  opacity: 0.5;
+}
+
+.profit-header {
+  background-color: var(--info-color) !important; /* 收益背景颜色 */
+  opacity: 0.5;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -488,5 +612,61 @@ body {
     align-items: flex-start;
     gap: 10px;
   }
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 25px;
+  border-radius: var(--border-radius);
+  width: 100%;
+  max-width: 500px;
+  box-shadow: var(--box-shadow);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancel-btn {
+  padding: 8px 16px;
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
+
+.confirm-btn {
+  padding: 8px 16px;
+  background-color: var(--success-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
+
+.sell-btn {
+  padding: 4px 8px;
+  background-color: var(--warning-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  margin-right: 5px;
 }
 </style>
