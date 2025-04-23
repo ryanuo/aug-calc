@@ -53,7 +53,7 @@ watch(() => transactions.value, (newVal) => {
     }
     return sum
   }, 0)
-}, { immediate: true })
+}, { immediate: true, deep: true })
 
 function addTransaction() {
   if (newTransaction.weight > 0 && newTransaction.price > 0) {
@@ -148,10 +148,7 @@ function deleteTransaction(index: number) {
             <div class="stat-label">
               总盈亏
             </div>
-            <div
-              class="stat-value"
-              :class="{ profit: staticData.totalProfit > 0, loss: staticData.totalProfit < 0 }"
-            >
+            <div class="stat-value" :class="{ profit: staticData.totalProfit > 0, loss: staticData.totalProfit < 0 }">
               {{ staticData.totalProfit }} 元
             </div>
           </div>
