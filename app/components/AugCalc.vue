@@ -151,12 +151,12 @@ function getAverageBuyPrice() {
 
             <div class="form-group">
               <label class="form-label">克数 (克)</label>
-              <input v-model="newTransaction.weight" type="number" step="0.01" min="0" class="form-input" required>
+              <input v-model="newTransaction.weight" type="number" step="0.0001" min="0" class="form-input" required>
             </div>
 
             <div class="form-group">
               <label class="form-label">单价 (元/克)</label>
-              <input v-model="newTransaction.price" type="number" step="0.01" min="0" class="form-input" required>
+              <input v-model="newTransaction.price" type="number" step="0.0001" min="0" class="form-input" required>
             </div>
 
             <button type="submit" class="submit-btn">
