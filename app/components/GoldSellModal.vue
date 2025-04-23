@@ -20,7 +20,7 @@ const emit = defineEmits(['update:visible', 'submit'])
 
 const formData = ref({
   weight: props.initialData.weight,
-  price: props.initialData.price,
+  price: undefined,
   feePercentage: props.initialData.feePercentage,
 })
 
@@ -67,19 +67,6 @@ function handleSubmit() {
           </div>
 
           <div class="form-group">
-            <label class="form-label">单价 (元/克)</label>
-            <input
-              v-model="formData.price"
-              type="number"
-              step="0.0001"
-              min="0"
-              class="form-input"
-              placeholder="请输入当前金价"
-              required
-            >
-          </div>
-
-          <div class="form-group">
             <label class="form-label">手续费 (%)</label>
             <input
               v-model="formData.feePercentage"
@@ -88,6 +75,19 @@ function handleSubmit() {
               min="0.3"
               class="form-input"
               placeholder="0.3"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">单价 (元/克)</label>
+            <input
+              v-model="formData.price"
+              type="number"
+              step="0.0001"
+              min="0"
+              class="form-input"
+              placeholder="请输入当前金价"
               required
             >
           </div>

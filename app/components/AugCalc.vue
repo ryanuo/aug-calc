@@ -15,7 +15,6 @@ interface Transaction {
   buy: ItemTransaction
   sell?: ItemTransaction
 }
-
 const transactions = useStorage<Transaction[]>('transactions', [])
 
 const newTransaction = reactive({
@@ -94,7 +93,15 @@ function addTransaction() {
   }
 }
 
-const showSellModal = reactive({
+interface ShowSellModalType {
+  visible: boolean
+  index: number
+  weight: number
+  price: number
+  feePercentage: number
+}
+
+const showSellModal = reactive<ShowSellModalType>({
   visible: false,
   index: -1,
   weight: 0,
@@ -113,15 +120,14 @@ function openSellModal(index: number) {
   }
 }
 
-function sellTransaction() {
-  const transaction = transactions.value[showSellModal.index]
+function sellTransaction(e: ShowSellModalType) {
+  const transaction = transactions.value[e.index]
   if (transaction && transaction.buy) {
-    const fee = new Decimal(showSellModal.price).times(showSellModal.weight).times(showSellModal.feePercentage).dividedBy(100).toNumber()
-    const profit = new Decimal(showSellModal.price).times(showSellModal.weight).minus(new Decimal(transaction.buy.price).times(showSellModal.weight)).minus(fee).toNumber()
-
+    const fee = new Decimal(e.price).times(e.weight).times(e.feePercentage).dividedBy(100).toNumber()
+    const profit = new Decimal(e.price).times(e.weight).minus(new Decimal(transaction.buy.price).times(e.weight)).minus(fee).toNumber()
     transaction.sell = {
-      weight: showSellModal.weight,
-      price: showSellModal.price,
+      weight: e.weight,
+      price: e.price,
       time: new Date().toISOString(),
       profit,
       fee,
@@ -275,7 +281,9 @@ function deleteTransaction(index: number) {
                 <td>{{ transaction.sell?.price || '-' }} 元</td>
                 <td>{{ transaction.sell ? new Date(transaction.sell.time).toLocaleString() : '-' }}</td>
                 <td>{{ transaction.sell?.fee || '-' }} 元</td>
-                <td :class="{ profit: !!transaction?.sell?.profit, loss: transaction.sell?.profit !== 0 && Number(transaction.sell?.profit) < 0 }">
+                <td
+                  :class="{ profit: !!transaction?.sell?.profit, loss: transaction.sell?.profit !== 0 && Number(transaction.sell?.profit) < 0 }"
+                >
                   {{ transaction.sell?.profit || '-' }} 元
                 </td>
                 <td>
@@ -293,11 +301,7 @@ function deleteTransaction(index: number) {
       </section>
 
       <!-- Sell Modal -->
-      <GoldSellModal
-        v-model:visible="showSellModal.visible"
-        :initial-data="showSellModal"
-        @submit="sellTransaction"
-      />
+      <GoldSellModal v-model:visible="showSellModal.visible" :initial-data="showSellModal" @submit="sellTransaction" />
     </main>
   </div>
 </template>
@@ -334,17 +338,20 @@ body {
 
 <style scoped>
 .buy-header {
-  background-color: var(--success-color) !important; /* 买入背景颜色 */
+  background-color: var(--success-color) !important;
+  /* 买入背景颜色 */
   opacity: 0.5;
 }
 
 .sell-header {
-  background-color: var(--danger-color) !important; /* 卖出背景颜色 */
+  background-color: var(--danger-color) !important;
+  /* 卖出背景颜色 */
   opacity: 0.5;
 }
 
 .profit-header {
-  background-color: var(--info-color) !important; /* 收益背景颜色 */
+  background-color: var(--info-color) !important;
+  /* 收益背景颜色 */
   opacity: 0.5;
 }
 
