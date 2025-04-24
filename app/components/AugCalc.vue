@@ -34,6 +34,8 @@ const staticData = reactive({
   waitSellAvaPrice: 0,
 })
 
+const isShowTimeRow = ref(false)
+
 const sortedTransactions = computed(() => {
   return [...transactions.value].sort((a, b) => {
     const aTime = new Date(a.buy?.time || a.sell?.time || 0).getTime()
@@ -138,16 +140,15 @@ function deleteTransaction(index: number) {
 <template>
   <div class="container">
     <header class="header">
-      <h1 class="title">
-        📊 黄金交易记录
-      </h1>
+      <h4 class="title text-black" flex="~ gap-2 items-center">
+        <img src="/favicon.svg"><div class="h-full" flex="~ items-center">
+          Gold Trades
+        </div>
+      </h4>
     </header>
 
     <main class="main-content">
       <section class="stats-section">
-        <h2 class="section-title">
-          📈 统计概览
-        </h2>
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-label">
@@ -204,22 +205,27 @@ function deleteTransaction(index: number) {
           <h2 class="section-title">
             📋 交易记录
           </h2>
-          <button class="sort-btn" @click="sortByTime.ascending = !sortByTime.ascending">
-            {{ sortByTime.ascending ? '↑ 时间升序' : '↓ 时间降序' }}
-          </button>
+          <div>
+            <button class="sort-btn" @click="sortByTime.ascending = !sortByTime.ascending">
+              {{ sortByTime.ascending ? '↑ 时间升序' : '↓ 时间降序' }}
+            </button>
+            <button class="sort-btn ml-1" @click="isShowTimeRow = !isShowTimeRow">
+              {{ isShowTimeRow ? '隐藏时间' : '显示时间' }}
+            </button>
+          </div>
         </div>
 
         <div class="table-container">
           <table class="transactions-table">
             <thead>
               <tr>
-                <th colspan="4" class="buy-header">
+                <th :colspan="isShowTimeRow ? 4 : 3" class="buy-header">
                   买入
                 </th>
-                <th colspan="4" class="sell-header">
+                <th :colspan="isShowTimeRow ? 4 : 3" class="sell-header">
                   卖出
                 </th>
-                <th colspan="2" class="profit-header">
+                <th :colspan="2" class="profit-header">
                   收益
                 </th>
                 <th rowspan="2">
@@ -236,7 +242,7 @@ function deleteTransaction(index: number) {
                 <th class="buy-header">
                   Total
                 </th>
-                <th class="buy-header">
+                <th v-if="isShowTimeRow" class="buy-header">
                   时间
                 </th>
                 <th class="sell-header">
@@ -248,7 +254,7 @@ function deleteTransaction(index: number) {
                 <th class="sell-header">
                   Total
                 </th>
-                <th class="sell-header">
+                <th v-if="isShowTimeRow" class="sell-header">
                   时间
                 </th>
                 <th class="profit-header">
@@ -264,11 +270,15 @@ function deleteTransaction(index: number) {
                 <td>{{ numberToFixed(transaction.buy?.weight) }} 克</td>
                 <td>{{ numberToFixed(transaction.buy?.price) }} 元</td>
                 <td>{{ numberToFixed(transaction.buy?.totalPrice) }} 元</td>
-                <td>{{ new Date(transaction.buy!.time).toLocaleString() }}</td>
+                <td v-if="isShowTimeRow">
+                  {{ new Date(transaction.buy!.time).toLocaleString() }}
+                </td>
                 <td>{{ transaction.sell?.weight ? `${numberToFixed(transaction.sell.weight)} 克` : '-' }}</td>
                 <td>{{ transaction.sell?.price ? `${numberToFixed(transaction.sell.price)} 元` : '-' }}</td>
                 <td>{{ transaction.sell?.totalPrice ? `${numberToFixed(transaction.sell.totalPrice)} 元` : '-' }}</td>
-                <td>{{ transaction.sell ? new Date(transaction.sell.time).toLocaleString() : '-' }}</td>
+                <td v-if="isShowTimeRow">
+                  {{ transaction.sell ? new Date(transaction.sell.time).toLocaleString() : '-' }}
+                </td>
                 <td>{{ transaction.sell?.fee ? `${numberToFixed(transaction.sell.fee)} 元` : '-' }}</td>
                 <td
                   :class="{
@@ -375,14 +385,14 @@ body {
 }
 
 .header {
-  text-align: center;
+  text-align: left;
   margin-bottom: 30px;
 }
 
 .title {
-  color: var(--primary-color);
-  font-size: 2.5rem;
+  font-size: 1rem;
   margin-bottom: 10px;
+  font-weight: 600;
 }
 
 .section-title {
