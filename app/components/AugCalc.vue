@@ -63,7 +63,7 @@ watch(() => transactions.value, (newVal) => {
     }
     return sum
   }, 0)
-  staticData.waitSellAvaPrice = Number(new Decimal(totalWaitSellAvaPrice).dividedBy(staticData.totalWeight).toFixed(4))
+  staticData.waitSellAvaPrice = new Decimal(totalWaitSellAvaPrice).dividedBy(staticData.totalWeight).toNumber()
 }, { immediate: true, deep: true })
 
 function addTransaction() {
@@ -73,7 +73,7 @@ function addTransaction() {
         weight: newTransaction.weight,
         price: newTransaction.price,
         time: new Date().toISOString(),
-        totalPrice: Number(new Decimal(newTransaction.price).times(newTransaction.weight).toFixed(4)),
+        totalPrice: new Decimal(newTransaction.price).times(newTransaction.weight).toNumber(),
       },
     })
     newTransaction.weight = 0
@@ -119,7 +119,7 @@ function sellTransaction(e: ShowSellModalType) {
       time: new Date().toISOString(),
       profit,
       fee,
-      totalPrice: Number(new Decimal(e.price).times(e.weight).toFixed(4)),
+      totalPrice: new Decimal(e.price).times(e.weight).toNumber(),
     }
 
     showSellModal.visible = false
@@ -154,7 +154,7 @@ function deleteTransaction(index: number) {
               可卖克数
             </div>
             <div class="stat-value">
-              {{ staticData.totalWeight }} 克
+              {{ numberToFixed(staticData.totalWeight) }} 克
             </div>
           </div>
           <div class="stat-card">
@@ -162,7 +162,7 @@ function deleteTransaction(index: number) {
               待卖均价
             </div>
             <div class="stat-value">
-              {{ staticData.waitSellAvaPrice }} 克
+              {{ numberToFixed(staticData.waitSellAvaPrice) }} 元
             </div>
           </div>
           <div class="stat-card">
@@ -170,7 +170,7 @@ function deleteTransaction(index: number) {
               总盈亏
             </div>
             <div class="stat-value" :class="{ profit: staticData.totalProfit > 0, loss: staticData.totalProfit < 0 }">
-              {{ staticData.totalProfit }} 元
+              {{ numberToFixed(staticData.totalProfit) }} 元
             </div>
           </div>
         </div>
@@ -261,22 +261,22 @@ function deleteTransaction(index: number) {
             </thead>
             <tbody>
               <tr v-for="(transaction, index) in sortedTransactions" :key="index">
-                <td>{{ transaction.buy?.weight }} 克</td>
-                <td>{{ transaction.buy?.price }} 元</td>
-                <td>{{ transaction.buy?.totalPrice }} 元</td>
+                <td>{{ numberToFixed(transaction.buy?.weight) }} 克</td>
+                <td>{{ numberToFixed(transaction.buy?.price) }} 元</td>
+                <td>{{ numberToFixed(transaction.buy?.totalPrice) }} 元</td>
                 <td>{{ new Date(transaction.buy!.time).toLocaleString() }}</td>
-                <td>{{ transaction.sell?.weight ? `${transaction.sell.weight} 克` : '-' }}</td>
-                <td>{{ transaction.sell?.price ? `${transaction.sell.price} 元` : '-' }}</td>
-                <td>{{ transaction.sell?.totalPrice ? `${transaction.sell.totalPrice} 元` : '-' }}</td>
+                <td>{{ transaction.sell?.weight ? `${numberToFixed(transaction.sell.weight)} 克` : '-' }}</td>
+                <td>{{ transaction.sell?.price ? `${numberToFixed(transaction.sell.price)} 元` : '-' }}</td>
+                <td>{{ transaction.sell?.totalPrice ? `${numberToFixed(transaction.sell.totalPrice)} 元` : '-' }}</td>
                 <td>{{ transaction.sell ? new Date(transaction.sell.time).toLocaleString() : '-' }}</td>
-                <td>{{ transaction.sell?.fee ? `${transaction.sell.fee} 元` : '-' }}</td>
+                <td>{{ transaction.sell?.fee ? `${numberToFixed(transaction.sell.fee)} 元` : '-' }}</td>
                 <td
                   :class="{
                     profit: !!transaction?.sell?.profit,
                     loss: Number(transaction.sell?.profit) < 0,
                   }"
                 >
-                  {{ transaction.sell?.profit ? `${transaction.sell.profit} 元` : '-' }}
+                  {{ transaction.sell?.profit ? `${numberToFixed(transaction.sell.profit)} 元` : '-' }}
                 </td>
                 <td>
                   <button class="sell-btn" @click="openSellModal(index)">
@@ -313,20 +313,25 @@ function deleteTransaction(index: number) {
   --border-radius: 8px;
   --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   --transition: all 0.3s ease;
+  --light-on: white;
 }
 
-:root[data-theme='dark'] {
-  --primary-color: #6c757d;
-  --secondary-color: #4a6baf;
-  --success-color: #28a745;
-  --danger-color: #dc3545;
-  --warning-color: #ffc107;
-  --info-color: #17a2b8;
-  --light-color: #343a40;
-  --dark-color: #f8f9fa;
-  --box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
+/* 暗黑模式 */
+.dark:root {
+  --primary-color: #5e72e4; /* 更明亮的主色 */
+  --secondary-color: #adb5bd; /* 更柔和的次色 */
+  --success-color: #2dce89; /* 更亮的绿色 */
+  --danger-color: #f5365c; /* 更深的红色 */
+  --warning-color: #f4b400; /* 更柔和的黄色 */
+  --info-color: #11cdef; /* 清新的蓝色 */
+  --light-color: #102333; /* 更深的背景色 */
+  --dark-color: #172738; /* 更深的文字色 */
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* 增强的阴影效果 */
+  --transition: all 0.3s ease;
+  --light-on: #ffffff; /* 更亮的文字色 */
 }
 
+/* 全局样式 */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -334,39 +339,37 @@ function deleteTransaction(index: number) {
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Roboto';
   line-height: 1.6;
   color: var(--dark-color);
   background-color: var(--light-color);
 }
 
 .dark body {
-  color: var(--light-color);
+  color: #fff;
   background-color: var(--dark-color);
 }
 </style>
 
 <style scoped>
+/* 其他样式 */
 .buy-header {
   background-color: var(--success-color) !important;
-  /* 买入背景颜色 */
   opacity: 0.5;
 }
 
 .sell-header {
   background-color: var(--danger-color) !important;
-  /* 卖出背景颜色 */
   opacity: 0.5;
 }
 
 .profit-header {
   background-color: var(--info-color) !important;
-  /* 收益背景颜色 */
   opacity: 0.5;
 }
 
 .container {
-  max-width: 100%;
+  max-width: 98%;
   margin: 0 auto;
   padding: 32px;
 }
@@ -398,7 +401,6 @@ body {
   margin-bottom: 20px;
 }
 
-/* 统计卡片样式 */
 .stats-section {
   margin-bottom: 30px;
   cursor: pointer;
@@ -444,7 +446,6 @@ body {
   color: var(--danger-color);
 }
 
-/* 表单样式 */
 .form-section {
   margin-bottom: 30px;
 }
@@ -513,7 +514,6 @@ body {
   margin-right: 8px;
 }
 
-/* 按钮样式 */
 .submit-btn,
 .sort-btn,
 .delete-btn {
@@ -528,7 +528,7 @@ body {
 
 .submit-btn {
   background-color: var(--primary-color);
-  color: white;
+  color: var(--light-on);
   height: 42px;
 }
 
@@ -539,7 +539,7 @@ body {
 
 .sort-btn {
   background-color: var(--secondary-color);
-  color: white;
+  color: var(--light-on);
 }
 
 .sort-btn:hover {
@@ -548,17 +548,17 @@ body {
 
 .delete-btn {
   background-color: var(--danger-color);
-  color: white;
+  color: var(--light-on);
 }
 
 .delete-btn:hover {
   background-color: #c82333;
 }
 
-/* 表格样式 */
 .table-container {
+  width: 100%;
   overflow-x: auto;
-  background: white;
+  background: var(--light-on);
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
 }
@@ -577,7 +577,7 @@ body {
 
 .transactions-table th {
   background-color: var(--primary-color);
-  color: white;
+  color: var(--light-on);
   font-weight: 500;
 }
 
@@ -595,7 +595,6 @@ body {
   font-weight: 500;
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
   .form-row {
     grid-template-columns: 1fr;
@@ -626,7 +625,7 @@ body {
 }
 
 .modal-content {
-  background: white;
+  background: var(--light-on);
   padding: 25px;
   border-radius: var(--border-radius);
   width: 100%;
@@ -644,7 +643,7 @@ body {
 .cancel-btn {
   padding: 8px 16px;
   background-color: var(--secondary-color);
-  color: white;
+  color: var(--light-on);
   border: none;
   border-radius: var(--border-radius);
   cursor: pointer;
@@ -653,7 +652,7 @@ body {
 .confirm-btn {
   padding: 8px 16px;
   background-color: var(--success-color);
-  color: white;
+  color: var(--light-on);
   border: none;
   border-radius: var(--border-radius);
   cursor: pointer;
@@ -662,7 +661,7 @@ body {
 .sell-btn {
   padding: 2px 8px;
   background-color: var(--warning-color);
-  color: white;
+  color: var(--light-on);
   border: none;
   font-size: 0.8rem;
   border-radius: var(--border-radius);

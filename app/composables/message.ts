@@ -36,4 +36,4 @@ export const useMessageStore = defineStore('message', () => {
 })
 
 if (import.meta.hot)
-  import.meta.hot.accept(acceptHMRUpdate(useUserStore, import.meta.hot))
+  import.meta.hot.accept(acceptHMRUpdate(useMessageStore, import.meta.hot))
