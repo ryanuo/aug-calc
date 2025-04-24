@@ -206,14 +206,8 @@ function exportData() {
               {{ numberToFixed(staticData.totalProfit) }} 元
             </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-label">
-              实时金价
-            </div>
-            <div class="stat-value">
-              <OnlineGoldPrice />
-            </div>
-          </div>
+          <!-- 实时金价 -->
+          <OnlineGoldPrice />
         </div>
       </section>
 
@@ -421,6 +415,31 @@ body {
   color: #fff;
   background-color: var(--dark-color);
 }
+
+.stat-card {
+  background: var(--light-color);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  box-shadow: var(--box-shadow);
+  transition: var(--transition);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stat-label {
+  font-size: 1rem;
+  color: var(--secondary-color);
+  margin-bottom: 10px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--dark-color);
+}
 </style>
 
 <style scoped>
@@ -483,31 +502,6 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   margin-bottom: 30px;
-}
-
-.stat-card {
-  background: var(--light-color);
-  border-radius: var(--border-radius);
-  padding: 20px;
-  box-shadow: var(--box-shadow);
-  transition: var(--transition);
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-
-.stat-label {
-  font-size: 1rem;
-  color: var(--secondary-color);
-  margin-bottom: 10px;
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--dark-color);
 }
 
 .profit {
