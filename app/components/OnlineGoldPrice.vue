@@ -3,7 +3,7 @@
 const goldLow = ref(0)
 const goldHigh = ref(0)
 const goldPrice = ref(0)
-const { data, error, execute } = await useFetch('/api/gold', { immediate: false })
+const { data, error, execute } = await useFetch('/gold', { immediate: false })
 
 // 获取数据的函数
 async function fetchGoldData() {
