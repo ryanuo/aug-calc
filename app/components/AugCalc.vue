@@ -174,6 +174,14 @@ function deleteTransaction(index: number) {
               {{ numberToFixed(staticData.totalProfit) }} 元
             </div>
           </div>
+          <div class="stat-card">
+            <div class="stat-label">
+              实时金价
+            </div>
+            <div class="stat-value">
+              <OnlineGoldPrice />
+            </div>
+          </div>
         </div>
       </section>
 
@@ -539,10 +547,11 @@ body {
 .submit-btn {
   background-color: var(--primary-color);
   color: var(--light-on);
-  height: 42px;
+  height: 44px;
 }
 
 .submit-btn:hover {
+  transition: all 0.3s ease;
   background-color: #3a5a9f;
   transform: translateY(-2px);
 }
