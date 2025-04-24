@@ -20,6 +20,12 @@ export default defineConfig({
     presetAttributify(),
     presetIcons({
       scale: 1.2,
+      extraProperties: {
+        'display': 'inline-block',
+        'height': '1.2em',
+        'width': '1.2em',
+        'vertical-align': 'middle',
+      },
     }),
     presetTypography(),
     presetWebFonts({

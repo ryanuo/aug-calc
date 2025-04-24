@@ -35,6 +35,7 @@ const staticData = reactive({
 })
 
 const isShowTimeRow = ref(false)
+const { showMessage } = useMessageStore()
 
 const sortedTransactions = computed(() => {
   return [...transactions.value].sort((a, b) => {
@@ -135,13 +136,44 @@ function sellTransaction(e: ShowSellModalType) {
 function deleteTransaction(index: number) {
   transactions.value.splice(index, 1)
 }
+
+function importData(e: any) {
+  if (e.target.files && e.target.files.length > 0) {
+    const file = e.target.files[0]
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const jsonData = JSON.parse(event.target!.result as string)
+      transactions.value = jsonData
+    }
+    reader.readAsText(file)
+  }
+}
+
+function exportData() {
+  const data = JSON.stringify(transactions.value)
+  const blob = new Blob([data], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'transactions.json'
+  link.click()
+  URL.revokeObjectURL(url)
+
+  showMessage(
+    {
+      t: 'success',
+      message: '导出成功',
+    },
+  )
+}
 </script>
 
 <template>
   <div class="container">
     <header class="header">
-      <h4 class="title text-black" flex="~ gap-2 items-center">
-        <img src="/favicon.svg"><div class="h-full" flex="~ items-center">
+      <h4 class="title text-black cursor-pointer" flex="~ gap-2 items-center">
+        <img src="/favicon.svg">
+        <div class="h-full translate-y-[3px]" flex="~ items-center">
           Gold Trades
         </div>
       </h4>
@@ -211,9 +243,20 @@ function deleteTransaction(index: number) {
       <section class="transactions-section">
         <div class="section-header">
           <h2 class="section-title">
-            📋 交易记录
+            📋 交易记录 <span v-if="transactions.length" class="text-xs">共{{ transactions.length }}条</span>
           </h2>
           <div>
+            <button class="import-btn">
+              <input
+                type="file" accept=".json"
+                class="opacity-0 h-full w-full cursor-pointer absolute"
+                @change="importData"
+              >
+              <div class="i-hugeicons-upload-02" /> 导入数据
+            </button>
+            <button class="export-btn" @click="exportData">
+              <div class="i-jam-download" /> 导出数据
+            </button>
             <button class="sort-btn" @click="sortByTime.ascending = !sortByTime.ascending">
               {{ sortByTime.ascending ? '↑ 时间升序' : '↓ 时间降序' }}
             </button>
@@ -332,21 +375,32 @@ function deleteTransaction(index: number) {
   --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   --transition: all 0.3s ease;
   --light-on: white;
+  --export-btn: rgba(8, 93, 83, 0.856);
+  --export-hover-bth: rgb(8, 93, 83);
 }
 
 /* 暗黑模式 */
 .dark:root {
-  --primary-color: #5e72e4; /* 更明亮的主色 */
-  --secondary-color: #adb5bd; /* 更柔和的次色 */
-  --success-color: #2dce89; /* 更亮的绿色 */
-  --danger-color: #f5365c; /* 更深的红色 */
-  --warning-color: #f4b400; /* 更柔和的黄色 */
-  --info-color: #11cdef; /* 清新的蓝色 */
-  --light-color: #102333; /* 更深的背景色 */
-  --dark-color: #172738; /* 更深的文字色 */
-  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* 增强的阴影效果 */
+  --primary-color: #5e72e4;
+  /* 更明亮的主色 */
+  --secondary-color: #adb5bd;
+  /* 更柔和的次色 */
+  --success-color: #2dce89;
+  /* 更亮的绿色 */
+  --danger-color: #f5365c;
+  /* 更深的红色 */
+  --warning-color: #f4b400;
+  /* 更柔和的黄色 */
+  --info-color: #11cdef;
+  /* 清新的蓝色 */
+  --light-color: #102333;
+  /* 更深的背景色 */
+  --dark-color: #172738;
+  /* 更深的文字色 */
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  /* 增强的阴影效果 */
   --transition: all 0.3s ease;
-  --light-on: #ffffff; /* 更亮的文字色 */
+  --light-on: #ffffff;
 }
 
 /* 全局样式 */
@@ -534,7 +588,10 @@ body {
 
 .submit-btn,
 .sort-btn,
+.export-btn,
+.import-btn,
 .delete-btn {
+  position: relative;
   padding: 2px 8px;
   border: none;
   border-radius: var(--border-radius);
@@ -542,6 +599,19 @@ body {
   font-weight: 500;
   cursor: pointer;
   transition: var(--transition);
+}
+
+.export-btn,
+.import-btn {
+  background-color: var(--export-btn);
+  color: var(--light-on);
+  margin-right: 8px;
+}
+.export-btn:hover,
+.import-btn:hover {
+  transition: all 0.3s ease;
+  background-color: var(--export-hover-bth);
+  transform: translateY(-1px);
 }
 
 .submit-btn {

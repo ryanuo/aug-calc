@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     '@nuxtjs/color-mode',
     '@vite-pwa/nuxt',
     '@nuxt/eslint',
+    '@nuxt/icon',
   ],
 
   devtools: {
@@ -67,6 +68,14 @@ export default defineNuxtConfig({
       nuxt: {
         sortConfigKeys: true,
       },
+    },
+  },
+
+  icon: {
+    mode: 'css',
+    cssLayer: 'base',
+    serverBundle: {
+      collections: ['material', 'fontawesome'],
     },
   },
 
