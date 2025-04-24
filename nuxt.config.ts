@@ -75,7 +75,7 @@ export default defineNuxtConfig({
     mode: 'css',
     cssLayer: 'base',
     serverBundle: {
-      collections: ['material', 'fontawesome'],
+      collections: ['uit', 'hugeicons', 'jam', 'codex'],
     },
   },
 
