@@ -13,10 +13,13 @@ catalogs:
     '@vite-pwa/nuxt': ^1.0.0
     '@vueuse/nuxt': ^13.1.0
     decimal.js: ^10.5.0
+    echarts: ^5.5.1
     nuxt: ^3.16.2
+    nuxt-echarts: 0.3.0
     unocss: ^66.1.0-beta.10
     unplugin: ^2.2.2
     vite: ^6.2.5
+
   dev:
     '@antfu/eslint-config': ^4.11.0
     '@types/node': ^22.14.1

@@ -81,12 +81,18 @@ useIntervalFn(fetchGoldData, 3000, { immediate: true })
             <!-- <div>{{ goldInfo.goldRate }}</div>
             <div>{{ goldInfo.goldUDI }}</div> -->
           </div>
-          <div class="text-xl font-bold">
+          <div
+            class="text-xl font-bold"
+            :class="{
+              profit: goldInfo.goldPrice > goldInfo.goldLow,
+              loss: goldInfo.goldPrice < goldInfo.goldLow,
+            }"
+          >
             {{ goldInfo.goldPrice ? `${goldInfo.goldPrice || 0} 元` : '-' }}
           </div>
-          <div class="text-xs font-bold">
-            <span class="profit text-green-500 mr-2">↑ {{ goldInfo.goldHigh }}</span>
-            <span class="loss text-red-500">↓ {{ goldInfo.goldLow }}</span>
+          <div class="text-xs font-bold op-30">
+            <span class="text-green-500 mr-2">↑ {{ goldInfo.goldHigh }}</span>
+            <span class="text-red-500">↓ {{ goldInfo.goldLow }}</span>
           </div>
         </div>
         <div v-else class="text-xl font-bold flex items-center justify-center">

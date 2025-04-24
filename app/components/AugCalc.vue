@@ -264,6 +264,9 @@ function exportData() {
           <table class="transactions-table">
             <thead>
               <tr>
+                <th rowspan="2">
+                  ID
+                </th>
                 <th :colspan="isShowTimeRow ? 4 : 3" class="buy-header">
                   买入
                 </th>
@@ -312,6 +315,7 @@ function exportData() {
             </thead>
             <tbody>
               <tr v-for="(transaction, index) in sortedTransactions" :key="index">
+                <td>{{ index + 1 }}</td>
                 <td>{{ numberToFixed(transaction.buy?.weight) }} 克</td>
                 <td>{{ numberToFixed(transaction.buy?.price) }} 元</td>
                 <td>{{ numberToFixed(transaction.buy?.totalPrice) }} 元</td>
@@ -344,6 +348,17 @@ function exportData() {
               </tr>
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <section class="mb-0 mt-10">
+        <div class="section-header mb-0!">
+          <h2 class="section-title">
+            📈 统计图表
+          </h2>
+        </div>
+        <div class="chart-wrapper">
+          <TransactionChart :transactions="transactions" />
         </div>
       </section>
 
@@ -640,7 +655,8 @@ body {
 
 .table-container {
   width: 100%;
-  overflow-x: auto;
+  height: 80vh;
+  overflow: auto;
   background: var(--light-on);
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
@@ -649,6 +665,14 @@ body {
 .transactions-table {
   width: 100%;
   border-collapse: collapse;
+}
+
+.transactions-table thead {
+  position: sticky;
+  top: 0;
+  background-color: #fff; /* 背景色设置为白色，以避免和下面的内容重叠 */
+  z-index: 1; /* 确保表头在其他内容上方 */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 给表头增加阴影，使其在滚动时更明显 */
 }
 
 .transactions-table th,
@@ -750,5 +774,12 @@ body {
   border-radius: var(--border-radius);
   margin-right: 5px;
   cursor: pointer;
+}
+
+.chart-wrapper {
+  background: var(--light-color);
+  border-radius: var(--border-radius);
+  padding: 25px;
+  box-shadow: var(--box-shadow);
 }
 </style>

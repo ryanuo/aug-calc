@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     '@vite-pwa/nuxt',
     '@nuxt/eslint',
     '@nuxt/icon',
+    'nuxt-echarts',
   ],
 
   devtools: {
@@ -60,6 +61,16 @@ export default defineNuxtConfig({
       crawlLinks: false,
       routes: ['/', '/gold'],
     },
+  },
+
+  echarts: {
+    charts: ['LineChart'],
+    components: [
+      'DatasetComponent',
+      'GridComponent',
+      'TooltipComponent',
+      'LegendComponent',
+    ],
   },
 
   eslint: {
