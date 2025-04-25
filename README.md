@@ -1,6 +1,6 @@
 # Gold Trades - 黄金交易记录分析工具
 
-![App Screenshot](/screenshot.png)
+![App Screenshot](/public/screenshot.gif)
 
 一个用于记录和分析黄金交易的Web应用程序，帮助您跟踪黄金买卖记录、计算盈亏和可视化交易数据。
 
