@@ -171,9 +171,9 @@ function exportData() {
 <template>
   <div class="container">
     <header class="header">
-      <h4 class="title text-black cursor-pointer" flex="~ gap-2 items-center">
-        <img src="/favicon.svg">
-        <div class="h-full translate-y-[3px]" flex="~ items-center">
+      <h4 class="title text-black cursor-pointer dark:text-white" flex="~ gap-2 items-center">
+        <span class="i-mdi-gold" />
+        <div class="h-full translate-y-[2px]" flex="~ items-center">
           Gold Trades
         </div>
       </h4>
@@ -242,8 +242,7 @@ function exportData() {
           <div>
             <button class="import-btn">
               <input
-                type="file" accept=".json"
-                class="opacity-0 h-full w-full cursor-pointer absolute"
+                type="file" accept=".json" class="opacity-0 h-full w-full cursor-pointer absolute"
                 @change="importData"
               >
               <div class="i-hugeicons-upload-02" /> 导入数据
@@ -369,94 +368,6 @@ function exportData() {
   <MessageDisplay />
 </template>
 
-<style>
-/* 基础样式 */
-:root {
-  --primary-color: #4a6baf;
-  --secondary-color: #6c757d;
-  --success-color: #28a745;
-  --danger-color: #dc3545;
-  --warning-color: #ffc107;
-  --info-color: #17a2b8;
-  --light-color: #f8f9fa;
-  --dark-color: #031528a0;
-  --border-radius: 8px;
-  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --transition: all 0.3s ease;
-  --light-on: white;
-  --export-btn: rgba(8, 93, 83, 0.856);
-  --export-hover-bth: rgb(8, 93, 83);
-}
-
-/* 暗黑模式 */
-.dark:root {
-  --primary-color: #5e72e4;
-  /* 更明亮的主色 */
-  --secondary-color: #adb5bd;
-  /* 更柔和的次色 */
-  --success-color: #2dce89;
-  /* 更亮的绿色 */
-  --danger-color: #f5365c;
-  /* 更深的红色 */
-  --warning-color: #f4b400;
-  /* 更柔和的黄色 */
-  --info-color: #11cdef;
-  /* 清新的蓝色 */
-  --light-color: #102333;
-  /* 更深的背景色 */
-  --dark-color: #172738;
-  /* 更深的文字色 */
-  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  /* 增强的阴影效果 */
-  --transition: all 0.3s ease;
-  --light-on: #ffffff;
-}
-
-/* 全局样式 */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: 'Roboto';
-  line-height: 1.6;
-  color: var(--dark-color);
-  background-color: var(--light-color);
-}
-
-.dark body {
-  color: #fff;
-  background-color: var(--dark-color);
-}
-
-.stat-card {
-  background: var(--light-color);
-  border-radius: var(--border-radius);
-  padding: 20px;
-  box-shadow: var(--box-shadow);
-  transition: var(--transition);
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-}
-
-.stat-label {
-  font-size: 1rem;
-  color: var(--secondary-color);
-  margin-bottom: 10px;
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: var(--dark-color);
-}
-</style>
-
 <style scoped>
 /* 其他样式 */
 .buy-header {
@@ -559,7 +470,7 @@ body {
 .form-input {
   width: 100%;
   padding: 10px 15px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--form-input);
   border-radius: var(--border-radius);
   font-size: 1rem;
   transition: var(--transition);
@@ -616,6 +527,7 @@ body {
   color: var(--light-on);
   margin-right: 8px;
 }
+
 .export-btn:hover,
 .import-btn:hover {
   transition: all 0.3s ease;
@@ -657,9 +569,10 @@ body {
   width: 100%;
   height: 80vh;
   overflow: auto;
-  background: var(--light-on);
+  background: var(--card-bg-color);
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
+  color: var(--stat-value);
 }
 
 .transactions-table {
@@ -670,16 +583,16 @@ body {
 .transactions-table thead {
   position: sticky;
   top: 0;
-  background-color: #fff; /* 背景色设置为白色，以避免和下面的内容重叠 */
-  z-index: 1; /* 确保表头在其他内容上方 */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 给表头增加阴影，使其在滚动时更明显 */
+  background-color: #fff;
+  z-index: 1;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .transactions-table th,
 .transactions-table td {
   padding: 12px 15px;
   text-align: left;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--td-border);
 }
 
 .transactions-table th {

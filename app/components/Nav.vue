@@ -8,19 +8,14 @@ useHead({
     content: () => color.value === 'dark' ? '#222222' : '#ffffff',
   }],
 })
-const useMsgStore = useMessageStore()
 
 function toggleDark() {
-  useMsgStore.showMessage({
-    t: 'info',
-    message: 'waiting for dark mode to develop...',
-  })
-  // color.preference = color.value === 'dark' ? 'light' : 'dark'
+  color.preference = color.value === 'dark' ? 'light' : 'dark'
 }
 </script>
 
 <template>
-  <div flex="~ items-center gap-0.5" text-gray p1 rounded-1rem right-4 top-4 fixed backdrop-blur-md>
+  <div flex="~ items-center gap-0.5" text-gray p1 rounded-1rem right-4 top-4 fixed z-999 backdrop-blur-md>
     <button text-sm p2 rounded-xl cursor-pointer hover:bg-gray:10>
       <a href="https://github.com/ryanuo/aug-calc" target="_blank">
         <span class="i-uit-github-alt" />
