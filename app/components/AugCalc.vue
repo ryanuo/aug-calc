@@ -138,6 +138,18 @@ function sellTransaction(e: ShowSellModalType) {
 function deleteTransaction(index: number) {
   transactions.value.splice(index, 1)
 }
+
+function goToRow(index: number) {
+  const table = document.querySelector('.transactions-table') as HTMLTableElement
+  const row = table.rows[index + 2] // +2 to account for the header rows
+  if (row) {
+    row.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    row.classList.add('highlight')
+    setTimeout(() => {
+      row.classList.remove('highlight')
+    }, 4000)
+  }
+}
 </script>
 
 <template>
@@ -189,7 +201,7 @@ function deleteTransaction(index: number) {
         </h2>
         <div flex="~ gap-4">
           <div class="chart-wrapper flex-1">
-            <TransactionChart :transactions="transactions" />
+            <TransactionChart :transactions="transactions" :go-to-row="goToRow" />
           </div>
           <form class="transaction-form" @submit.prevent="addTransaction">
             <div class="form-row">
@@ -333,6 +345,12 @@ function deleteTransaction(index: number) {
 </template>
 
 <style scoped>
+.highlight {
+  background-color: rgba(0, 0, 0, 0.1);
+  transition: background-color 0.5s ease;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
 .border-thead {
   border-right: 1px solid var(--td-border);
 }

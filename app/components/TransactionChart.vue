@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import type { EChartsOption } from 'echarts/types/dist/shared'
+import type { ECElementEvent, EChartsOption } from 'echarts/types/dist/shared'
 import type { Transaction } from './type'
 
 const props = defineProps<{
   transactions: Transaction[]
+  // 跳转到指定的表格行
+  goToRow: (index: number) => void
 }>()
 
 const chartOptions = computed((): EChartsOption => {
@@ -84,12 +86,19 @@ const chartOptions = computed((): EChartsOption => {
     ],
   }
 })
+
+function handleViewClick(params: ECElementEvent) {
+  if (params.componentType === 'series') {
+    const index = params.dataIndex
+    props.goToRow(index)
+  }
+}
 </script>
 
 <template>
   <div class="chart-container">
     <ClientOnly fallback-tag="div" fallback="Loading comments...">
-      <v-chart :option="chartOptions" />
+      <v-chart :option="chartOptions" @click="handleViewClick" />
     </ClientOnly>
   </div>
 </template>
