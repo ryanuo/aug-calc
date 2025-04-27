@@ -68,20 +68,26 @@ function handleSubmit() {
         <div class="modal-body">
           <div class="form-group">
             <label class="form-label">克数 (克)</label>
-            <input v-model="formData.weight" type="number" step="0.0001" min="0" class="form-input"
-              placeholder="请输入卖出克数" required>
+            <input
+              v-model="formData.weight" type="number" step="0.0001" min="0" class="form-input"
+              placeholder="请输入卖出克数" required
+            >
           </div>
 
           <div class="form-group">
             <label class="form-label">手续费 (%)</label>
-            <input v-model="formData.feePercentage" type="number" step="0.01" :min="FEEPROCENTAGE.DEFAULT"
-              class="form-input" :placeholder="`${FEEPROCENTAGE.DEFAULT}`" required>
+            <input
+              v-model="formData.feePercentage" type="number" step="0.01" :min="FEEPROCENTAGE.DEFAULT"
+              class="form-input" :placeholder="`${FEEPROCENTAGE.DEFAULT}`" required
+            >
           </div>
 
           <div class="form-group">
             <label class="form-label">单价 (元/克)</label>
-            <input v-model="formData.price" type="number" step="0.0001" :min="`${props.initialData.price}`"
-              class="form-input" placeholder="请输入当前金价" required>
+            <input
+              v-model="formData.price" type="number" step="0.0001" :min="`${props.initialData.price}`"
+              class="form-input" placeholder="请输入当前金价" required
+            >
           </div>
         </div>
 

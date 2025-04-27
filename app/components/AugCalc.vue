@@ -245,10 +245,10 @@ function deleteTransaction(index: number) {
                 <th :colspan="isShowTimeRow ? 4 : 3" class="buy-header border-thead">
                   买入
                 </th>
-                <th :colspan="isShowTimeRow ? 4 : 3" class="sell-header border-thead">
+                <th :colspan="isShowTimeRow ? 4 : 3" class="border-thead sell-header">
                   卖出
                 </th>
-                <th :colspan="2" class="profit-header border-thead">
+                <th :colspan="2" class="border-thead profit-header">
                   收益
                 </th>
                 <th rowspan="2">

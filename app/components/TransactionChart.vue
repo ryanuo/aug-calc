@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { EChartsOption } from 'echarts/types/dist/shared'
-import type { Transaction } from './type';
+import type { Transaction } from './type'
 
 const props = defineProps<{
   transactions: Transaction[]
@@ -39,18 +39,18 @@ const chartOptions = computed((): EChartsOption => {
       },
       formatter: (params: any) => {
         if (params.length === 0) {
-          return '';
+          return ''
         }
 
-        const id = params[0]!.axisValue - 1;
-        const weight = props.transactions![id]!.buy.weight;
-        const title = `<div style="text-align: left; font-weight: 600;">${weight} 克</div>`;
+        const id = params[0]!.axisValue - 1
+        const weight = props.transactions![id]!.buy.weight
+        const title = `<div style="text-align: left; font-weight: 600;">${weight} 克</div>`
         const details = params
           .map((item: any) => {
-            return `<div style="text-align: left;">${item.marker} ${item.seriesName}: ${item.value.toFixed(4)} 元</div>`;
+            return `<div style="text-align: left;">${item.marker} ${item.seriesName}: ${item.value.toFixed(4)} 元</div>`
           })
-          .join('');
-        return `${title}${details}`;
+          .join('')
+        return `${title}${details}`
       },
     },
     yAxis: {
