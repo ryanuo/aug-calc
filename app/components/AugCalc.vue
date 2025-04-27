@@ -103,7 +103,7 @@ const showSellModal = reactive<ShowSellModalType>({
 })
 
 function openSellModal(index: number) {
-  const transaction = transactions.value[index]
+  const transaction = sortedTransactions.value[index]
   if (transaction!.buy) {
     showSellModal.visible = true
     showSellModal.index = index
@@ -114,7 +114,7 @@ function openSellModal(index: number) {
 }
 
 function sellTransaction(e: ShowSellModalType) {
-  const transaction = transactions.value[e.index]
+  const transaction = sortedTransactions.value[e.index]
   if (transaction && transaction.buy) {
     const fee = new Decimal(e.price).times(e.weight).times(e.feePercentage).dividedBy(100).toNumber()
     const profit = new Decimal(e.price).times(e.weight).minus(new Decimal(transaction.buy.price).times(e.weight)).minus(fee).toNumber()
@@ -348,6 +348,7 @@ function goToRow(index: number) {
       <GoldSellModal v-model:visible="showSellModal.visible" :initial-data="showSellModal" @submit="sellTransaction" />
     </main>
   </div>
+  <MessageDisplay />
 </template>
 
 <style scoped>
