@@ -13,10 +13,10 @@ const newTransaction = reactive({
 })
 
 watch(
-  () => newTransaction.totalPrice,
-  (newVal) => {
-    if (newVal > 0 && newTransaction.price > 0) {
-      newTransaction.weight = numberToFixed(new Decimal(newVal).dividedBy(newTransaction.price).toNumber())
+  [() => newTransaction.totalPrice, () => newTransaction.price],
+  ([newTotalPrice, price]) => {
+    if (price > 0 && newTotalPrice > 0) {
+      newTransaction.weight = numberToFixed(new Decimal(newTotalPrice).dividedBy(price).toNumber())
     }
     else {
       newTransaction.weight = 0
@@ -207,12 +207,18 @@ function goToRow(index: number) {
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">克数 (克)</label>
-                <input v-model="newTransaction.weight" type="number" step="0.0001" min="0" class="form-input bg-#eaeaea dark:bg-#1c1c3057" required disabled>
+                <input
+                  v-model="newTransaction.weight" type="number" step="0.0001" min="0"
+                  class="form-input bg-#eaeaea dark:bg-#1c1c3057" required disabled
+                >
               </div>
 
               <div class="form-group">
                 <label class="form-label">买入金额（元）</label>
-                <input v-model="newTransaction.totalPrice" type="number" step="0.0001" min="0" class="form-input" required>
+                <input
+                  v-model="newTransaction.totalPrice" type="number" step="0.0001" min="0" class="form-input"
+                  required
+                >
               </div>
 
               <div class="form-group">
