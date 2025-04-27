@@ -22,7 +22,20 @@ const transactions = useStorage<Transaction[]>('transactions', [])
 const newTransaction = reactive({
   weight: 0,
   price: 0,
+  totalPrice: 0,
 })
+
+watch(
+  () => newTransaction.totalPrice,
+  (newVal) => {
+    if (newVal > 0 && newTransaction.price > 0) {
+      newTransaction.weight = numberToFixed(new Decimal(newVal).dividedBy(newTransaction.price).toNumber())
+    }
+    else {
+      newTransaction.weight = 0
+    }
+  },
+)
 
 const sortByTime = reactive({
   ascending: true,
@@ -215,23 +228,33 @@ function exportData() {
         <h2 class="section-title">
           ➕ 添加买入记录
         </h2>
-        <form class="transaction-form" @submit.prevent="addTransaction">
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">克数 (克)</label>
-              <input v-model="newTransaction.weight" type="number" step="0.0001" min="0" class="form-input" required>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">单价 (元/克)</label>
-              <input v-model="newTransaction.price" type="number" step="0.0001" min="0" class="form-input" required>
-            </div>
-
-            <button type="submit" class="submit-btn">
-              添加买入
-            </button>
+        <div flex="~ gap-4">
+          <div class="chart-wrapper flex-1">
+            <TransactionChart :transactions="transactions" />
           </div>
-        </form>
+          <form class="transaction-form" @submit.prevent="addTransaction">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">克数 (克)</label>
+                <input v-model="newTransaction.weight" type="number" step="0.0001" min="0" class="form-input bg-#eaeaea" required disabled>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">买入金额（元）</label>
+                <input v-model="newTransaction.totalPrice" type="number" step="0.0001" min="0" class="form-input" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">单价 (元/克)</label>
+                <input v-model="newTransaction.price" type="number" step="0.0001" min="0" class="form-input" required>
+              </div>
+
+              <button type="submit" class="submit-btn">
+                添加买入
+              </button>
+            </div>
+          </form>
+        </div>
       </section>
 
       <section class="transactions-section">
@@ -347,17 +370,6 @@ function exportData() {
               </tr>
             </tbody>
           </table>
-        </div>
-      </section>
-
-      <section class="mb-0 mt-10">
-        <div class="section-header mb-0!">
-          <h2 class="section-title">
-            📈 统计图表
-          </h2>
-        </div>
-        <div class="chart-wrapper">
-          <TransactionChart :transactions="transactions" />
         </div>
       </section>
 

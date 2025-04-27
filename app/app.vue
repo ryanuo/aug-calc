@@ -34,10 +34,10 @@ html.dark {
   --danger-color: #dc3545;
   --warning-color: #ffc107;
   --info-color: #17a2b8;
-  --card-bg-color: #f8f9fa;
+  --card-bg-color: #fff;
   --dark-color: #031528a0;
   --border-radius: 8px;
-  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --box-shadow: 0px 1px 7px rgba(0, 0, 0, 0.1);
   --transition: all 0.3s ease;
   --light-on: white;
   --export-btn: rgba(8, 93, 83, 0.856);
@@ -45,6 +45,8 @@ html.dark {
   --stat-value: #031528a0;
   --form-input: #ddd;
   --td-border: #ddd;
+  --page-font-color: #172738;
+  --page-bg-color: #fdfdfdd2;
 }
 
 /* 暗黑模式 */
@@ -57,12 +59,14 @@ html.dark {
   --info-color: #11cdef;
   --card-bg-color: #102333;
   --dark-color: #172738;
-  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  --box-shadow: 1px 1px 7px 1px rgba(94, 86, 86, 0.1);
   --transition: all 0.3s ease;
   --light-on: #ffffff;
   --stat-value: #afaaaa;
   --form-input: #485965;
   --td-border: #485965;
+  --page-font-color: #fff;
+  --page-bg-color: #172738;
 }
 
 /* 全局样式 */
@@ -75,13 +79,8 @@ html.dark {
 body {
   font-family: 'Roboto';
   line-height: 1.6;
-  color: var(--dark-color);
-  background-color: var(--card-bg-color);
-}
-
-.dark body {
-  color: #fff;
-  background-color: var(--dark-color);
+  color: var(--page-font-color);
+  background-color: var(--page-bg-color);
 }
 
 .stat-card {

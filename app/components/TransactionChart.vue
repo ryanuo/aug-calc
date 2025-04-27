@@ -106,7 +106,6 @@ const chartOptions = computed((): EChartsOption => {
 <style scoped>
 .chart-container {
   margin-top: 20px;
-  width: 100%;
-  height: 400px;
+  height: 300px;
 }
 </style>
