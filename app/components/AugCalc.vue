@@ -1,24 +1,11 @@
 <script setup lang="ts">
+import type { Transaction } from './type'
 import { useStorage } from '@vueuse/core'
 import Decimal from 'decimal.js'
-import { computed, reactive } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { FEEPROCENTAGE } from '~/constants'
 
-interface ItemTransaction {
-  weight: number
-  price: number
-  totalPrice: number
-  time: string
-  profit?: number
-  fee?: number
-}
-
-interface Transaction {
-  buy: ItemTransaction
-  sell?: ItemTransaction
-}
 const transactions = useStorage<Transaction[]>('transactions', [])
-
 const newTransaction = reactive({
   weight: 0,
   price: 0,
@@ -48,8 +35,6 @@ const staticData = reactive({
 })
 
 const isShowTimeRow = ref(false)
-const { showMessage } = useMessageStore()
-
 const sortedTransactions = computed(() => {
   return [...transactions.value].sort((a, b) => {
     const aTime = new Date(a.buy?.time || a.sell?.time || 0).getTime()
@@ -59,6 +44,10 @@ const sortedTransactions = computed(() => {
 })
 
 watch(() => transactions.value, (newVal) => {
+  if (!newVal.length) {
+    return
+  }
+
   staticData.totalWeight = newVal.reduce((sum, transaction) => {
     if (!transaction.sell?.weight) {
       sum = new Decimal(sum).plus(transaction.buy.weight).toNumber()
@@ -149,36 +138,6 @@ function sellTransaction(e: ShowSellModalType) {
 function deleteTransaction(index: number) {
   transactions.value.splice(index, 1)
 }
-
-function importData(e: any) {
-  if (e.target.files && e.target.files.length > 0) {
-    const file = e.target.files[0]
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      const jsonData = JSON.parse(event.target!.result as string)
-      transactions.value = jsonData
-    }
-    reader.readAsText(file)
-  }
-}
-
-function exportData() {
-  const data = JSON.stringify(transactions.value)
-  const blob = new Blob([data], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = 'transactions.json'
-  link.click()
-  URL.revokeObjectURL(url)
-
-  showMessage(
-    {
-      t: 'success',
-      message: '导出成功',
-    },
-  )
-}
 </script>
 
 <template>
@@ -236,7 +195,7 @@ function exportData() {
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">克数 (克)</label>
-                <input v-model="newTransaction.weight" type="number" step="0.0001" min="0" class="form-input bg-#eaeaea" required disabled>
+                <input v-model="newTransaction.weight" type="number" step="0.0001" min="0" class="form-input bg-#eaeaea dark:bg-#1c1c3057" required disabled>
               </div>
 
               <div class="form-group">
@@ -263,17 +222,11 @@ function exportData() {
             📋 交易记录 <span v-if="transactions.length" class="text-xs">共{{ transactions.length }}条</span>
           </h2>
           <div>
-            <button class="import-btn">
-              <input
-                type="file" accept=".json" class="opacity-0 h-full w-full cursor-pointer absolute"
-                @change="importData"
-              >
-              <div class="i-hugeicons-upload-02" /> 导入数据
-            </button>
-            <button class="export-btn" @click="exportData">
-              <div class="i-jam-download" /> 导出数据
-            </button>
-            <button class="sort-btn" @click="sortByTime.ascending = !sortByTime.ascending">
+            <ImportExport
+              :transactions="transactions"
+              @update:transactions="(newTransactions) => transactions = newTransactions"
+            />
+            <button class="sort-btn ml-1" @click="sortByTime.ascending = !sortByTime.ascending">
               {{ sortByTime.ascending ? '↑ 时间升序' : '↓ 时间降序' }}
             </button>
             <button class="sort-btn ml-1" @click="isShowTimeRow = !isShowTimeRow">
@@ -289,13 +242,13 @@ function exportData() {
                 <th rowspan="2">
                   ID
                 </th>
-                <th :colspan="isShowTimeRow ? 4 : 3" class="buy-header">
+                <th :colspan="isShowTimeRow ? 4 : 3" class="buy-header border-thead">
                   买入
                 </th>
-                <th :colspan="isShowTimeRow ? 4 : 3" class="sell-header">
+                <th :colspan="isShowTimeRow ? 4 : 3" class="sell-header border-thead">
                   卖出
                 </th>
-                <th :colspan="2" class="profit-header">
+                <th :colspan="2" class="profit-header border-thead">
                   收益
                 </th>
                 <th rowspan="2">
@@ -309,11 +262,11 @@ function exportData() {
                 <th class="buy-header">
                   单价
                 </th>
-                <th class="buy-header">
-                  Total
-                </th>
                 <th v-if="isShowTimeRow" class="buy-header">
                   时间
+                </th>
+                <th class="buy-header border-thead">
+                  Total
                 </th>
                 <th class="sell-header">
                   克数
@@ -321,11 +274,11 @@ function exportData() {
                 <th class="sell-header">
                   单价
                 </th>
-                <th class="sell-header">
-                  Total
-                </th>
                 <th v-if="isShowTimeRow" class="sell-header">
                   时间
+                </th>
+                <th class="sell-header border-thead">
+                  Total
                 </th>
                 <th class="profit-header">
                   手续费
@@ -340,16 +293,16 @@ function exportData() {
                 <td>{{ index + 1 }}</td>
                 <td>{{ numberToFixed(transaction.buy?.weight) }} 克</td>
                 <td>{{ numberToFixed(transaction.buy?.price) }} 元</td>
-                <td>{{ numberToFixed(transaction.buy?.totalPrice) }} 元</td>
                 <td v-if="isShowTimeRow">
                   {{ new Date(transaction.buy!.time).toLocaleString() }}
                 </td>
+                <td>{{ numberToFixed(transaction.buy?.totalPrice) }} 元</td>
                 <td>{{ transaction.sell?.weight ? `${numberToFixed(transaction.sell.weight)} 克` : '-' }}</td>
                 <td>{{ transaction.sell?.price ? `${numberToFixed(transaction.sell.price)} 元` : '-' }}</td>
-                <td>{{ transaction.sell?.totalPrice ? `${numberToFixed(transaction.sell.totalPrice)} 元` : '-' }}</td>
                 <td v-if="isShowTimeRow">
                   {{ transaction.sell ? new Date(transaction.sell.time).toLocaleString() : '-' }}
                 </td>
+                <td>{{ transaction.sell?.totalPrice ? `${numberToFixed(transaction.sell.totalPrice)} 元` : '-' }}</td>
                 <td>{{ transaction.sell?.fee ? `${numberToFixed(transaction.sell.fee)} 元` : '-' }}</td>
                 <td
                   :class="{
@@ -377,23 +330,26 @@ function exportData() {
       <GoldSellModal v-model:visible="showSellModal.visible" :initial-data="showSellModal" @submit="sellTransaction" />
     </main>
   </div>
-  <MessageDisplay />
 </template>
 
 <style scoped>
+.border-thead {
+  border-right: 1px solid var(--td-border);
+}
+
 /* 其他样式 */
 .buy-header {
-  background-color: var(--success-color) !important;
+  /* background-color: var(--success-color) !important; */
   opacity: 0.5;
 }
 
 .sell-header {
-  background-color: var(--danger-color) !important;
+  /* background-color: var(--danger-color) !important; */
   opacity: 0.5;
 }
 
 .profit-header {
-  background-color: var(--info-color) !important;
+  /* background-color: var(--info-color) !important; */
   opacity: 0.5;
 }
 
@@ -455,7 +411,7 @@ function exportData() {
 }
 
 .transaction-form {
-  background: var(--light-color);
+  background: var(--card-bg-color);
   border-radius: var(--border-radius);
   padding: 25px;
   box-shadow: var(--box-shadow);
@@ -702,7 +658,7 @@ function exportData() {
 }
 
 .chart-wrapper {
-  background: var(--light-color);
+  background: var(--card-bg-color);
   border-radius: var(--border-radius);
   padding: 25px;
   box-shadow: var(--box-shadow);

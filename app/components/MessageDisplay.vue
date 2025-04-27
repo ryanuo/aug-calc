@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// 获取消息、类型和可见性
 const messageStore = useMessageStore()
 </script>
 

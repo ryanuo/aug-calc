@@ -1,19 +1,6 @@
 <script setup lang="ts">
 import type { EChartsOption } from 'echarts/types/dist/shared'
-
-interface ItemTransaction {
-  weight: number
-  price: number
-  totalPrice: number
-  time: string
-  profit?: number
-  fee?: number
-}
-
-interface Transaction {
-  buy: ItemTransaction
-  sell?: ItemTransaction
-}
+import type { Transaction } from './type';
 
 const props = defineProps<{
   transactions: Transaction[]
@@ -32,34 +19,38 @@ const chartOptions = computed((): EChartsOption => {
       bottom: '0px',
       containLabel: true,
     },
-
-    legend: {
-      data: [
-        {
-          name: '买入',
-          icon: 'circle',
-        },
-        {
-          name: '卖出',
-          icon: 'circle',
-        },
-      ],
-    },
+    legend: [
+      {
+        data: ['买入', '卖出'],
+        right: '5%',
+      },
+    ],
     xAxis: {
       type: 'category',
       data: props.transactions.map((_, index) => `${index + 1}`),
     },
     tooltip: {
       trigger: 'axis',
-      // formatter: (params) => {
-      //   console.log( params)
-      //   return ''
-      // },
       axisPointer: {
         type: 'cross',
         label: {
           backgroundColor: '#283b56',
         },
+      },
+      formatter: (params: any) => {
+        if (params.length === 0) {
+          return '';
+        }
+
+        const id = params[0]!.axisValue - 1;
+        const weight = props.transactions![id]!.buy.weight;
+        const title = `<div style="text-align: left; font-weight: 600;">${weight} 克</div>`;
+        const details = params
+          .map((item: any) => {
+            return `<div style="text-align: left;">${item.marker} ${item.seriesName}: ${item.value.toFixed(4)} 元</div>`;
+          })
+          .join('');
+        return `${title}${details}`;
       },
     },
     yAxis: {
