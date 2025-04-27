@@ -9,8 +9,8 @@ const props = defineProps<{
 }>()
 
 const chartOptions = computed((): EChartsOption => {
-  const buyData = props.transactions?.map(transaction => transaction.buy.totalPrice)
-  const sellData = props.transactions?.map(transaction => transaction?.sell?.totalPrice || 0)
+  const buyData = props.transactions?.map(transaction => transaction.buy.price)
+  const sellData = props.transactions?.map(transaction => transaction?.sell?.price || 0)
 
   return {
     color: ['green', 'red'],
@@ -47,17 +47,22 @@ const chartOptions = computed((): EChartsOption => {
         const id = params[0]!.axisValue - 1
         const weight = props.transactions![id]!.buy.weight
         const title = `<div style="text-align: left; font-weight: 600;">${weight} 克</div>`
-        const details = params
+        let details = params
           .map((item: any) => {
             return `<div style="text-align: left;">${item.marker} ${item.seriesName}: ${item.value.toFixed(4)} 元</div>`
           })
           .join('')
+        // 计算盈亏
+        const profit = props.transactions![id]!.sell?.profit
+        if (profit) {
+          details += `<div style="text-align: left; color: ${profit > 0 ? 'red' : 'green'}; font-weight:600; font-size:12px;">盈亏: ${profit.toFixed(4)} 元</div>`
+        }
         return `${title}${details}`
       },
     },
     yAxis: {
       type: 'value',
-      min: 0, // 设置最小值
+      min: 'dataMin',
       axisLabel: {
         formatter: (value: number) => {
           return `${value.toFixed(2)} 元`
@@ -77,7 +82,7 @@ const chartOptions = computed((): EChartsOption => {
       {
         name: '卖出',
         type: 'line',
-        data: sellData,
+        data: sellData?.filter(item => item > 0),
         smooth: true,
         lineStyle: {
           color: 'red',
