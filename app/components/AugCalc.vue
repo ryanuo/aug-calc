@@ -110,7 +110,7 @@ function openSellModal(index: number) {
     showSellModal.visible = true
     showSellModal.index = index
     showSellModal.weight = transaction!.buy.weight
-    showSellModal.price = 0
+    showSellModal.price = transaction!.buy.price
     showSellModal.feePercentage = FEEPROCENTAGE.DEFAULT
   }
 }

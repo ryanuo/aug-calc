@@ -22,6 +22,8 @@ const props = defineProps({
 
 const emit = defineEmits(['update:visible', 'submit'])
 
+const onlineGoldStore = useOnlineGoldStore()
+
 const formData = ref({
   weight: props.initialData.weight,
   price: undefined,
@@ -58,7 +60,7 @@ function handleSubmit() {
       <div class="modal-content">
         <div class="modal-header">
           <h3 class="modal-title">
-            卖出黄金
+            卖出黄金 <span class="text-xs">实时金价（{{ onlineGoldStore.onlineGoldInfo?.SH?.[0]?.SP }}）</span><span class="text-xs">买入单价（{{ props.initialData.price }}）</span>
           </h3>
           <button class="modal-close" @click="closeModal">
             &times;

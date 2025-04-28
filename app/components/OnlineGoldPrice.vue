@@ -18,30 +18,16 @@ const symbolSign = computed(() => {
   return '↓'
 })
 
-const { data, error, execute } = await useFetch<{
-  data: {
-    SH: {
-      Low: number
-      High: number
-      SP: number
-    }[]
-    GJ: {
-      SP: number
-      Low: number
-      Symbol: string
-    }[]
-  }
-}>('https://free.xwteam.cn/api/gold/trade', { immediate: false })
-
+const store = useOnlineGoldStore()
 // 获取数据的函数
 async function fetchGoldData() {
-  if (error.value) {
-    console.error('API Error:', error.value)
+  if (store.error) {
+    console.error('API Error:', store.error)
   }
   else {
-    await execute()
-    const newData = data.value?.data?.SH?.[0]
-    const newData2 = data.value?.data?.GJ
+    await store.getOnlineGold()
+    const newData = store.onlineGoldInfo?.SH?.[0]
+    const newData2 = store.onlineGoldInfo?.GJ
     if (newData) {
       goldInfo.goldLow = newData.Low || 0
       goldInfo.goldHigh = newData.High || 0
@@ -67,9 +53,7 @@ useIntervalFn(fetchGoldData, 3000, { immediate: true })
     <div class="stat-value">
       <div>
         <div v-if="goldInfo.goldPrice">
-          <div
-            class="text-xs font-normal text-right op-50 right-1 top-1 absolute"
-          >
+          <div class="text-xs font-normal text-right op-50 right-1 top-1 absolute">
             <div
               :class="{
                 profit: goldInfo.goldLDPrice.SP < goldInfo.goldLDPrice.Low,
@@ -82,8 +66,7 @@ useIntervalFn(fetchGoldData, 3000, { immediate: true })
             <div>{{ goldInfo.goldUDI }}</div> -->
           </div>
           <div
-            class="text-xl font-bold"
-            :class="{
+            class="text-xl font-bold" :class="{
               profit: goldInfo.goldPrice < goldInfo.goldLow,
               loss: goldInfo.goldPrice > goldInfo.goldLow,
             }"
