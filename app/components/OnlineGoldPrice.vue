@@ -72,8 +72,8 @@ useIntervalFn(fetchGoldData, 3000, { immediate: true })
           >
             <div
               :class="{
-                profit: goldInfo.goldLDPrice.SP > goldInfo.goldLDPrice.Low,
-                loss: goldInfo.goldLDPrice.SP < goldInfo.goldLDPrice.Low,
+                profit: goldInfo.goldLDPrice.SP < goldInfo.goldLDPrice.Low,
+                loss: goldInfo.goldLDPrice.SP > goldInfo.goldLDPrice.Low,
               }"
             >
               {{ `${symbolSign} ${goldInfo.goldLDPrice.SP}` }}
@@ -84,15 +84,15 @@ useIntervalFn(fetchGoldData, 3000, { immediate: true })
           <div
             class="text-xl font-bold"
             :class="{
-              profit: goldInfo.goldPrice > goldInfo.goldLow,
-              loss: goldInfo.goldPrice < goldInfo.goldLow,
+              profit: goldInfo.goldPrice < goldInfo.goldLow,
+              loss: goldInfo.goldPrice > goldInfo.goldLow,
             }"
           >
-            {{ goldInfo.goldPrice ? `${goldInfo.goldPrice || 0} 元` : '-' }}
+            {{ goldInfo.goldPrice ? `${symbolSign}${goldInfo.goldPrice || 0} 元` : '-' }}
           </div>
           <div class="text-xs font-bold op-30">
-            <span class="text-green-500 mr-2">↑ {{ goldInfo.goldHigh }}</span>
-            <span class="text-red-500">↓ {{ goldInfo.goldLow }}</span>
+            <span class="text-green-500 mr-2">{{ goldInfo.goldHigh }}</span>
+            <span class="text-red-500">{{ goldInfo.goldLow }}</span>
           </div>
         </div>
         <div v-else class="text-xl font-bold flex items-center justify-center">

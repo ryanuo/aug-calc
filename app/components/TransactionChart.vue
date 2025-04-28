@@ -47,15 +47,16 @@ const chartOptions = computed((): EChartsOption => {
         const id = params[0]!.axisValue - 1
         const weight = props.transactions![id]!.buy.weight
         const title = `<div style="text-align: left; font-weight: 600;">${weight} 克</div>`
-        let details = params
+
+        let details = params?.filter((i: any) => i?.value)
           .map((item: any) => {
             return `<div style="text-align: left;">${item.marker} ${item.seriesName}: ${item.value.toFixed(4)} 元</div>`
           })
           .join('')
         // 计算盈亏
         const profit = props.transactions![id]!.sell?.profit
-        if (profit) {
-          details += `<div style="text-align: left; color: ${profit > 0 ? 'red' : 'green'}; font-weight:600; font-size:12px;">盈亏: ${profit.toFixed(4)} 元</div>`
+        if (Math.abs(profit as number)) {
+          details += `<div style="text-align: left; color: ${profit! > 0 ? 'red' : 'green'}; font-weight:600; font-size:12px;">盈亏: ${profit!.toFixed(4)} 元</div>`
         }
         return `${title}${details}`
       },
@@ -82,7 +83,12 @@ const chartOptions = computed((): EChartsOption => {
       {
         name: '卖出',
         type: 'line',
-        data: sellData?.filter(item => item > 0),
+        data: sellData?.map((item) => {
+          if (item === 0) {
+            return null
+          }
+          return item
+        }),
         smooth: true,
         lineStyle: {
           color: 'red',

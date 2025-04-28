@@ -2,7 +2,7 @@
 import type { Transaction } from './type'
 import { useStorage } from '@vueuse/core'
 import Decimal from 'decimal.js'
-import { computed, reactive, ref, watch } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { FEEPROCENTAGE } from '~/constants'
 
 const transactions = useStorage<Transaction[]>('transactions', [])
@@ -11,6 +11,15 @@ const newTransaction = reactive({
   price: 0,
   totalPrice: 0,
 })
+const sortByTime = reactive({
+  ascending: true,
+})
+const staticData = reactive({
+  totalWeight: 0,
+  totalProfit: 0,
+  waitSellAvaPrice: 0,
+})
+const isShowTimeRow = ref(false)
 
 watch(
   [() => newTransaction.totalPrice, () => newTransaction.price],
@@ -24,24 +33,16 @@ watch(
   },
 )
 
-const sortByTime = reactive({
-  ascending: true,
-})
-
-const staticData = reactive({
-  totalWeight: 0,
-  totalProfit: 0,
-  waitSellAvaPrice: 0,
-})
-
-const isShowTimeRow = ref(false)
-const sortedTransactions = computed(() => {
-  return [...transactions.value].sort((a, b) => {
-    const aTime = new Date(a.buy?.time || a.sell?.time || 0).getTime()
-    const bTime = new Date(b.buy?.time || b.sell?.time || 0).getTime()
-    return sortByTime.ascending ? aTime - bTime : bTime - aTime
-  })
-})
+watch(
+  () => sortByTime.ascending,
+  () => {
+    transactions.value = [...transactions.value].sort((a, b) => {
+      const aTime = new Date(a.buy?.time || a.sell?.time || 0).getTime()
+      const bTime = new Date(b.buy?.time || b.sell?.time || 0).getTime()
+      return sortByTime.ascending ? aTime - bTime : bTime - aTime
+    })
+  },
+)
 
 watch(() => transactions.value, (newVal) => {
   if (!newVal.length) {
@@ -83,6 +84,7 @@ function addTransaction() {
     })
     newTransaction.weight = 0
     newTransaction.price = 0
+    newTransaction.totalPrice = 0
   }
 }
 
@@ -103,7 +105,7 @@ const showSellModal = reactive<ShowSellModalType>({
 })
 
 function openSellModal(index: number) {
-  const transaction = sortedTransactions.value[index]
+  const transaction = transactions.value[index]
   if (transaction!.buy) {
     showSellModal.visible = true
     showSellModal.index = index
@@ -114,17 +116,18 @@ function openSellModal(index: number) {
 }
 
 function sellTransaction(e: ShowSellModalType) {
-  const transaction = sortedTransactions.value[e.index]
+  const transaction = transactions.value[e.index]
   if (transaction && transaction.buy) {
-    const fee = new Decimal(e.price).times(e.weight).times(e.feePercentage).dividedBy(100).toNumber()
-    const profit = new Decimal(e.price).times(e.weight).minus(new Decimal(transaction.buy.price).times(e.weight)).minus(fee).toNumber()
+    const totalPrice = new Decimal(e.price).times(e.weight)
+    const fee = totalPrice.times(e.feePercentage).dividedBy(100).toNumber()
+    const profit = totalPrice.minus(new Decimal(transaction.buy.totalPrice)).minus(fee).toNumber()
     transaction.sell = {
       weight: e.weight,
       price: e.price,
       time: new Date().toISOString(),
       profit,
       fee,
-      totalPrice: new Decimal(e.price).times(e.weight).toNumber(),
+      totalPrice: totalPrice.toNumber(),
     }
 
     showSellModal.visible = false
@@ -186,7 +189,7 @@ function goToRow(index: number) {
             <div class="stat-label">
               总盈亏
             </div>
-            <div class="stat-value" :class="{ profit: staticData.totalProfit > 0, loss: staticData.totalProfit < 0 }">
+            <div class="stat-value" :class="{ profit: staticData.totalProfit < 0, loss: staticData.totalProfit > 0 }">
               {{ numberToFixed(staticData.totalProfit) }} 元
             </div>
           </div>
@@ -307,7 +310,7 @@ function goToRow(index: number) {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(transaction, index) in sortedTransactions" :key="index">
+              <tr v-for="(transaction, index) in transactions" :key="index">
                 <td>{{ index + 1 }}</td>
                 <td>{{ numberToFixed(transaction.buy?.weight) }} 克</td>
                 <td>{{ numberToFixed(transaction.buy?.price) }} 元</td>
@@ -324,8 +327,8 @@ function goToRow(index: number) {
                 <td>{{ transaction.sell?.fee ? `${numberToFixed(transaction.sell.fee)} 元` : '-' }}</td>
                 <td
                   :class="{
-                    profit: !!transaction?.sell?.profit,
-                    loss: Number(transaction.sell?.profit) < 0,
+                    profit: Number(transaction?.sell?.profit) < 0,
+                    loss: Number(transaction.sell?.profit) > 0,
                   }"
                 >
                   {{ transaction.sell?.profit ? `${numberToFixed(transaction.sell.profit)} 元` : '-' }}
