@@ -212,7 +212,7 @@ function goToRow(index: number) {
                 <label class="form-label">克数 (克)</label>
                 <input
                   v-model="newTransaction.weight" type="number" step="0.0001" min="0"
-                  class="form-input bg-#eaeaea dark:bg-#1c1c3057" required disabled
+                  class="form-input bg-#eaeaea dark:bg-#1c1c3057 text-#999" required disabled
                 >
               </div>
 
