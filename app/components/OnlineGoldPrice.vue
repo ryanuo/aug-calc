@@ -74,8 +74,8 @@ useIntervalFn(fetchGoldData, 3000, { immediate: true })
             {{ goldInfo.goldPrice ? `${symbolSign}${goldInfo.goldPrice || 0} 元` : '-' }}
           </div>
           <div class="text-xs font-bold op-30">
-            <span class="text-green-500 mr-2">{{ goldInfo.goldHigh }}</span>
-            <span class="text-red-500">{{ goldInfo.goldLow }}</span>
+            <span class="text-red-500 mr-2">{{ goldInfo.goldHigh }}</span>
+            <span class="text-green-500">{{ goldInfo.goldLow }}</span>
           </div>
         </div>
         <div v-else class="text-xl font-bold flex items-center justify-center">
