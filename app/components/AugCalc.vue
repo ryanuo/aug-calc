@@ -153,6 +153,38 @@ function goToRow(index: number) {
     }, 4000)
   }
 }
+
+const selectedData = reactive({
+  totalWeight: 0,
+  averagePrice: 0,
+})
+const selectedIndexes = ref<number[]>([])
+
+function updateSelectedData() {
+  const selectedTransactions = transactions.value.filter((_, index) => selectedIndexes.value.includes(index))
+  const totalWeight = selectedTransactions.reduce((sum, transaction) => {
+    return sum + (transaction.buy?.weight || 0)
+  }, 0)
+  const totalPrice = selectedTransactions.reduce((sum, transaction) => {
+    return sum + (transaction.buy?.totalPrice || 0)
+  }, 0)
+  selectedData.totalWeight = totalWeight
+  selectedData.averagePrice = totalWeight > 0 ? totalPrice / totalWeight : 0
+}
+
+function handleCheckBoxChange(checked: boolean, index: number) {
+  if (checked) {
+    selectedIndexes.value.push(index)
+  }
+  else {
+    const idx = selectedIndexes.value.indexOf(index)
+    if (idx > -1) {
+      selectedIndexes.value.splice(idx, 1)
+    }
+  }
+}
+
+watch(selectedIndexes.value, updateSelectedData)
 </script>
 
 <template>
@@ -212,7 +244,7 @@ function goToRow(index: number) {
                 <label class="form-label">克数 (克)</label>
                 <input
                   v-model="newTransaction.weight" type="number" step="0.0001" min="0"
-                  class="form-input bg-#eaeaea dark:bg-#1c1c3057 text-#999" required disabled
+                  class="form-input text-#999 bg-#eaeaea dark:bg-#1c1c3057" required disabled
                 >
               </div>
 
@@ -240,7 +272,11 @@ function goToRow(index: number) {
       <section class="transactions-section">
         <div class="section-header">
           <h2 class="section-title">
-            📋 交易记录 <span v-if="transactions.length" class="text-xs">共{{ transactions.length }}条</span>
+            📋 交易记录
+            <span v-if="transactions.length" class="text-xs">共{{ transactions.length }}条</span>
+            <span v-if="selectedIndexes.length" class="text-xs text-green-500 ml-2">
+              已选中: {{ numberToFixed(selectedData.totalWeight) }} 克, 均价: {{ numberToFixed(selectedData.averagePrice) }} 元
+            </span>
           </h2>
           <div>
             <ImportExport
@@ -260,6 +296,7 @@ function goToRow(index: number) {
           <table class="transactions-table">
             <thead>
               <tr>
+                <th rowspan="2" />
                 <th rowspan="2">
                   ID
                 </th>
@@ -310,7 +347,16 @@ function goToRow(index: number) {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(transaction, index) in transactions" :key="index">
+              <tr
+                v-for="(transaction, index) in transactions"
+                :key="index"
+                :class="{ 'selected-row': selectedIndexes.includes(index) }"
+              >
+                <td>
+                  <Checkbox
+                    @change="(e) => handleCheckBoxChange(e, index)"
+                  />
+                </td>
                 <td>{{ index + 1 }}</td>
                 <td>{{ numberToFixed(transaction.buy?.weight) }} 克</td>
                 <td>{{ numberToFixed(transaction.buy?.price) }} 元</td>
@@ -690,5 +736,9 @@ function goToRow(index: number) {
   border-radius: var(--border-radius);
   padding: 25px;
   box-shadow: var(--box-shadow);
+}
+
+.selected-row {
+  background-color: rgba(0, 128, 0, 0.1);
 }
 </style>
