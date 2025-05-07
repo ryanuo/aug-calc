@@ -109,7 +109,7 @@ function openSellModal(index: number) {
   if (transaction!.buy) {
     showSellModal.visible = true
     showSellModal.index = index
-    showSellModal.weight = transaction!.buy.weight
+    showSellModal.weight = transaction!.buy.weight - (transaction!.sell?.weight || 0)
     showSellModal.price = transaction!.buy.price
     showSellModal.feePercentage = FEEPROCENTAGE.DEFAULT
   }
@@ -306,7 +306,7 @@ watch(selectedIndexes.value, updateSelectedData)
                 <th :colspan="isShowTimeRow ? 4 : 3" class="border-thead sell-header">
                   卖出
                 </th>
-                <th :colspan="2" class="border-thead profit-header">
+                <th :colspan="3" class="border-thead profit-header">
                   收益
                 </th>
                 <th rowspan="2">
@@ -337,6 +337,9 @@ watch(selectedIndexes.value, updateSelectedData)
                 </th>
                 <th class="sell-header border-thead">
                   Total
+                </th>
+                <th class="profit-header">
+                  进度
                 </th>
                 <th class="profit-header">
                   手续费
@@ -370,6 +373,25 @@ watch(selectedIndexes.value, updateSelectedData)
                   {{ transaction.sell ? new Date(transaction.sell.time).toLocaleString() : '-' }}
                 </td>
                 <td>{{ transaction.sell?.totalPrice ? `${numberToFixed(transaction.sell.totalPrice)} 元` : '-' }}</td>
+                <td>
+                  <div class="flex items-center justify-center relative">
+                    <svg class="h-15 w-15 transform -rotate-90">
+                      <circle
+                        cx="30" cy="30" r="20" stroke="currentColor" stroke-width="4" fill="transparent"
+                        class="text-green-500"
+                      />
+                      <circle
+                        cx="30" cy="30" r="20" stroke="currentColor" stroke-width="4" fill="transparent"
+                        :stroke-dasharray="2 * Math.PI * 20"
+                        :stroke-dashoffset="transaction.sell?.weight ? 2 * Math.PI * 20 * (transaction.sell?.weight / transaction.buy?.weight) : 0"
+                        class="text-red-100"
+                      />
+                    </svg>
+                    <span class="text-xs absolute">
+                      {{ transaction.sell?.weight ? `${numberToFixed(transaction.sell.weight / transaction.buy.weight * 100, 1)}%` : '-' }}
+                    </span>
+                  </div>
+                </td>
                 <td>{{ transaction.sell?.fee ? `${numberToFixed(transaction.sell.fee)} 元` : '-' }}</td>
                 <td
                   :class="{
@@ -457,7 +479,7 @@ watch(selectedIndexes.value, updateSelectedData)
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
 }
 
 .stats-section {
