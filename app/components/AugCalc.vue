@@ -306,7 +306,7 @@ watch(selectedIndexes.value, updateSelectedData)
                 <th :colspan="isShowTimeRow ? 4 : 3" class="border-thead sell-header">
                   卖出
                 </th>
-                <th :colspan="3" class="border-thead profit-header">
+                <th :colspan="2" class="border-thead profit-header">
                   收益
                 </th>
                 <th rowspan="2">
@@ -338,9 +338,9 @@ watch(selectedIndexes.value, updateSelectedData)
                 <th class="sell-header border-thead">
                   Total
                 </th>
-                <th class="profit-header">
+                <!-- <th class="profit-header">
                   进度
-                </th>
+                </th> -->
                 <th class="profit-header">
                   手续费
                 </th>
@@ -373,7 +373,7 @@ watch(selectedIndexes.value, updateSelectedData)
                   {{ transaction.sell ? new Date(transaction.sell.time).toLocaleString() : '-' }}
                 </td>
                 <td>{{ transaction.sell?.totalPrice ? `${numberToFixed(transaction.sell.totalPrice)} 元` : '-' }}</td>
-                <td>
+                <!-- <td>
                   <div class="flex items-center justify-center relative">
                     <svg class="h-15 w-15 transform -rotate-90">
                       <circle
@@ -391,7 +391,7 @@ watch(selectedIndexes.value, updateSelectedData)
                       {{ transaction.sell?.weight ? `${numberToFixed(transaction.sell.weight / transaction.buy.weight * 100, 1)}%` : '-' }}
                     </span>
                   </div>
-                </td>
+                </td> -->
                 <td>{{ transaction.sell?.fee ? `${numberToFixed(transaction.sell.fee)} 元` : '-' }}</td>
                 <td
                   :class="{
