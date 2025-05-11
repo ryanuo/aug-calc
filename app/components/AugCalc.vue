@@ -6,6 +6,7 @@ import { reactive, ref, watch } from 'vue'
 import { FEEPROCENTAGE } from '~/constants'
 
 const transactions = useStorage<Transaction[]>('transactions', [])
+
 const newTransaction = reactive({
   weight: 0,
   price: 0,
@@ -81,6 +82,7 @@ function addTransaction() {
         time: new Date().toISOString(),
         totalPrice: new Decimal(newTransaction.price).times(newTransaction.weight).toNumber(),
       },
+      id: new Date().getTime().toString(),
     })
     newTransaction.weight = 0
     newTransaction.price = 0
@@ -90,7 +92,7 @@ function addTransaction() {
 
 interface ShowSellModalType {
   visible: boolean
-  index: number
+  rowId: string
   weight: number
   price: number
   feePercentage: number
@@ -98,17 +100,17 @@ interface ShowSellModalType {
 
 const showSellModal = reactive<ShowSellModalType>({
   visible: false,
-  index: -1,
+  rowId: '',
   weight: 0,
   price: 0,
   feePercentage: FEEPROCENTAGE.DEFAULT,
 })
 
-function openSellModal(index: number) {
-  const transaction = transactions.value[index]
+function openSellModal(rowId: string) {
+  const transaction = transactions.value.find(item => item.id === rowId)
   if (transaction!.buy) {
     showSellModal.visible = true
-    showSellModal.index = index
+    showSellModal.rowId = rowId
     showSellModal.weight = transaction!.buy.weight - (transaction!.sell?.weight || 0)
     showSellModal.price = transaction!.buy.price
     showSellModal.feePercentage = FEEPROCENTAGE.DEFAULT
@@ -116,7 +118,7 @@ function openSellModal(index: number) {
 }
 
 function sellTransaction(e: ShowSellModalType) {
-  const transaction = transactions.value[e.index]
+  const transaction = transactions.value.find(item => item.id === e.rowId)
   if (transaction && transaction.buy) {
     const totalPrice = new Decimal(e.price).times(e.weight)
     const fee = totalPrice.times(e.feePercentage).dividedBy(100).toNumber()
@@ -131,20 +133,26 @@ function sellTransaction(e: ShowSellModalType) {
     }
 
     showSellModal.visible = false
-    showSellModal.index = -1
+    showSellModal.rowId = ''
     showSellModal.weight = 0
     showSellModal.price = 0
     showSellModal.feePercentage = FEEPROCENTAGE.DEFAULT
   }
 }
 
-function deleteTransaction(index: number) {
-  transactions.value.splice(index, 1)
+function deleteTransaction(rowId: string) {
+  const index = transactions.value.findIndex(item => item.id === rowId)
+  if (index > -1) {
+    transactions.value.splice(index, 1)
+  }
 }
 
-function goToRow(index: number) {
+function goToRow(rowId: string) {
   const table = document.querySelector('.transactions-table') as HTMLTableElement
-  const row = table.rows[index + 2] // +2 to account for the header rows
+  const rows = Array.from(table.rows) // Convert rows to an array
+  const row = rows.find(
+    (item, i) => item.dataset.rowKey === rowId && i > 0,
+  ) as HTMLTableRowElement
   if (row) {
     row.scrollIntoView({ behavior: 'smooth', block: 'center' })
     row.classList.add('highlight')
@@ -158,10 +166,10 @@ const selectedData = reactive({
   totalWeight: 0,
   averagePrice: 0,
 })
-const selectedIndexes = ref<number[]>([])
+const selectedIndexes = ref<string[]>([])
 
 function updateSelectedData() {
-  const selectedTransactions = transactions.value.filter((_, index) => selectedIndexes.value.includes(index))
+  const selectedTransactions = transactions.value.filter(_ => selectedIndexes.value.includes(_.id))
   const totalWeight = selectedTransactions.reduce((sum, transaction) => {
     return sum + (transaction.buy?.weight || 0)
   }, 0)
@@ -172,12 +180,12 @@ function updateSelectedData() {
   selectedData.averagePrice = totalWeight > 0 ? totalPrice / totalWeight : 0
 }
 
-function handleCheckBoxChange(checked: boolean, index: number) {
+function handleCheckBoxChange(checked: boolean, rowId: string) {
   if (checked) {
-    selectedIndexes.value.push(index)
+    selectedIndexes.value.push(rowId)
   }
   else {
-    const idx = selectedIndexes.value.indexOf(index)
+    const idx = selectedIndexes.value.indexOf(rowId)
     if (idx > -1) {
       selectedIndexes.value.splice(idx, 1)
     }
@@ -352,12 +360,13 @@ watch(selectedIndexes.value, updateSelectedData)
             <tbody>
               <tr
                 v-for="(transaction, index) in transactions"
-                :key="index"
-                :class="{ 'selected-row': selectedIndexes.includes(index) }"
+                :key="transaction.id"
+                :class="{ 'selected-row': selectedIndexes.includes(transaction.id) }"
+                :data-row-key="transaction.id"
               >
                 <td>
                   <Checkbox
-                    @change="(e) => handleCheckBoxChange(e, index)"
+                    @change="(e) => handleCheckBoxChange(e, transaction.id)"
                   />
                 </td>
                 <td>{{ index + 1 }}</td>
@@ -402,10 +411,10 @@ watch(selectedIndexes.value, updateSelectedData)
                   {{ transaction.sell?.profit ? `${numberToFixed(transaction.sell.profit)} 元` : '-' }}
                 </td>
                 <td>
-                  <button class="sell-btn" @click="openSellModal(index)">
+                  <button class="sell-btn" @click="openSellModal(transaction.id)">
                     卖出
                   </button>
-                  <button class="delete-btn" @click="deleteTransaction(index)">
+                  <button class="delete-btn" @click="deleteTransaction(transaction.id)">
                     删除
                   </button>
                 </td>
@@ -620,13 +629,16 @@ watch(selectedIndexes.value, updateSelectedData)
   background-color: #5a6268;
 }
 
-.delete-btn {
-  background-color: var(--danger-color);
-  color: var(--light-on);
-}
+/* .delete-btn { */
+/* background-color: var(--danger-color);
+  color: var(--light-on); */
+/* } */
 
-.delete-btn:hover {
-  background-color: #c82333;
+.delete-btn:hover,
+.sell-btn:hover {
+  /* background-color: #c82333; */
+  text-underline-offset: 4px;
+  text-decoration: underline;
 }
 
 .table-container {
@@ -744,8 +756,8 @@ watch(selectedIndexes.value, updateSelectedData)
 
 .sell-btn {
   padding: 2px 8px;
-  background-color: var(--warning-color);
-  color: var(--light-on);
+  /* background-color: var(--warning-color); */
+  /* color: var(--light-on); */
   border: none;
   font-size: 0.8rem;
   border-radius: var(--border-radius);

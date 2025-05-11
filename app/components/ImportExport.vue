@@ -41,6 +41,7 @@ function importData(e: any) {
               profit: row['盈利'] || 0,
             }
           : undefined,
+        id: row.ID || '',
       }))
       emits('update:transactions', updatedTransactions) // 通过事件传递数据
     }
@@ -49,8 +50,8 @@ function importData(e: any) {
 }
 
 function exportData() {
-  const tableData = props.transactions.map((transaction, index) => ({
-    ID: index + 1,
+  const tableData = props.transactions.map(transaction => ({
+    ID: transaction.id,
     买入克数: transaction.buy?.weight || '',
     买入单价: transaction.buy?.price || '',
     买入时间: transaction.buy?.time || '',

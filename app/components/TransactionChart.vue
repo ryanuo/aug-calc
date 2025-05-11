@@ -5,12 +5,20 @@ import type { Transaction } from './type'
 const props = defineProps<{
   transactions: Transaction[]
   // 跳转到指定的表格行
-  goToRow: (index: number) => void
+  goToRow: (rowId: string) => void
 }>()
 
 const chartOptions = computed((): EChartsOption => {
-  const buyData = props.transactions?.map(transaction => transaction.buy.price)
-  const sellData = props.transactions?.map(transaction => transaction?.sell?.price || 0)
+  const buyData = props.transactions?.map((transaction) => {
+    return {
+      id: transaction.id,
+      value: transaction?.buy?.price || 0,
+    }
+  })
+  const sellData = props.transactions?.map(transaction => (({
+    id: transaction.id,
+    value: transaction?.sell?.price || 0,
+  })))
 
   return {
     color: ['green', 'red'],
@@ -84,7 +92,7 @@ const chartOptions = computed((): EChartsOption => {
         name: '卖出',
         type: 'line',
         data: sellData?.map((item) => {
-          if (item === 0) {
+          if (item.value === 0) {
             return null
           }
           return item
@@ -100,8 +108,8 @@ const chartOptions = computed((): EChartsOption => {
 
 function handleViewClick(params: ECElementEvent) {
   if (params.componentType === 'series') {
-    const index = params.dataIndex
-    props.goToRow(index)
+    const rowMapData = params.data! as { id: string }
+    props.goToRow(rowMapData.id)
   }
 }
 </script>

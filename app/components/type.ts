@@ -8,6 +8,7 @@ export interface ItemTransaction {
 }
 
 export interface Transaction {
+  id: string
   buy: ItemTransaction
   sell?: ItemTransaction
 }
