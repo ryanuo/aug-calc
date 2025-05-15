@@ -24,6 +24,7 @@
     "@nuxt/icon": "catalog:build",
     "@nuxtjs/color-mode": "catalog:build",
     "@pinia/nuxt": "catalog:build",
+    "@ryanuo/utils": "catalog:build",
     "@types/node": "catalog:dev",
     "@unocss/eslint-config": "catalog:build",
     "@unocss/nuxt": "catalog:build",

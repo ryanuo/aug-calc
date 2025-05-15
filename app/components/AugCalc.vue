@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Transaction } from './type'
+import { numberToFixed, preciseAdd, preciseDiv, preciseMul, preciseSub } from '@ryanuo/utils'
 import { useStorage } from '@vueuse/core'
 import Decimal from 'decimal.js'
 import { reactive, ref, watch } from 'vue'
@@ -26,7 +27,7 @@ watch(
   [() => newTransaction.totalPrice, () => newTransaction.price],
   ([newTotalPrice, price]) => {
     if (price > 0 && newTotalPrice > 0) {
-      newTransaction.weight = numberToFixed(new Decimal(newTotalPrice).dividedBy(price).toNumber())
+      newTransaction.weight = numberToFixed(preciseDiv(newTotalPrice, price).toNumber())
     }
     else {
       newTransaction.weight = 0
@@ -52,25 +53,25 @@ watch(() => transactions.value, (newVal) => {
 
   staticData.totalWeight = newVal.reduce((sum, transaction) => {
     if (!transaction.sell?.weight) {
-      sum = new Decimal(sum).plus(transaction.buy.weight).toNumber()
+      sum = preciseAdd(sum, transaction.buy.weight).toNumber()
     }
     return sum
   }, 0)
 
   staticData.totalProfit = newVal.reduce((sum, transaction) => {
     if (transaction.sell?.profit) {
-      sum = new Decimal(sum).plus(transaction.sell.profit).toNumber()
+      sum = preciseAdd(sum, transaction.sell.profit).toNumber()
     }
     return sum
   }, 0)
 
   const totalWaitSellAvaPrice = newVal.reduce((sum, transaction) => {
     if (!transaction.sell?.price) {
-      sum = new Decimal(sum).plus(transaction.buy.totalPrice).toNumber()
+      sum = preciseAdd(sum, transaction.buy.totalPrice).toNumber()
     }
     return sum
   }, 0)
-  staticData.waitSellAvaPrice = new Decimal(totalWaitSellAvaPrice).dividedBy(staticData.totalWeight).toNumber()
+  staticData.waitSellAvaPrice = preciseDiv(totalWaitSellAvaPrice, staticData.totalWeight).toNumber()
 }, { immediate: true, deep: true })
 
 function addTransaction() {
@@ -80,7 +81,7 @@ function addTransaction() {
         weight: newTransaction.weight,
         price: newTransaction.price,
         time: new Date().toISOString(),
-        totalPrice: new Decimal(newTransaction.price).times(newTransaction.weight).toNumber(),
+        totalPrice: preciseMul(newTransaction.price, newTransaction.weight).toNumber(),
       },
       id: new Date().getTime().toString(),
     })
@@ -120,16 +121,16 @@ function openSellModal(rowId: string) {
 function sellTransaction(e: ShowSellModalType) {
   const transaction = transactions.value.find(item => item.id === e.rowId)
   if (transaction && transaction.buy) {
-    const totalPrice = new Decimal(e.price).times(e.weight)
-    const fee = totalPrice.times(e.feePercentage).dividedBy(100).toNumber()
-    const profit = totalPrice.minus(new Decimal(transaction.buy.totalPrice)).minus(fee).toNumber()
+    const totalPrice = preciseMul(e.price, e.weight).toNumber()
+    const fee = preciseDiv(preciseMul(totalPrice, e.feePercentage).toNumber(), 100).toNumber()
+    const profit = preciseSub(totalPrice, preciseAdd(transaction.buy.totalPrice, fee).toNumber()).toNumber()
     transaction.sell = {
       weight: e.weight,
       price: e.price,
       time: new Date().toISOString(),
       profit,
       fee,
-      totalPrice: totalPrice.toNumber(),
+      totalPrice,
     }
 
     showSellModal.visible = false
@@ -171,13 +172,13 @@ const selectedIndexes = ref<string[]>([])
 function updateSelectedData() {
   const selectedTransactions = transactions.value.filter(_ => selectedIndexes.value.includes(_.id))
   const totalWeight = selectedTransactions.reduce((sum, transaction) => {
-    return sum + (transaction.buy?.weight || 0)
+    return preciseAdd(sum, transaction.buy?.weight || 0).toNumber()
   }, 0)
   const totalPrice = selectedTransactions.reduce((sum, transaction) => {
-    return sum + (transaction.buy?.totalPrice || 0)
+    return preciseAdd(sum, transaction.buy?.totalPrice || 0).toNumber()
   }, 0)
   selectedData.totalWeight = totalWeight
-  selectedData.averagePrice = totalWeight > 0 ? totalPrice / totalWeight : 0
+  selectedData.averagePrice = totalWeight > 0 ? preciseDiv(totalPrice, totalWeight).toNumber() : 0
 }
 
 function handleCheckBoxChange(checked: boolean, rowId: string) {
