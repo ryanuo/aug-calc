@@ -8,7 +8,7 @@ catalogs:
     '@nuxt/icon': 1.12.0
     '@nuxtjs/color-mode': ^3.5.2
     '@pinia/nuxt': ^0.10.1
-    '@ryanuo/utils': ^1.1.0
+    '@ryanuo/utils': ^1.2.4
     '@unocss/eslint-config': ^66.1.0-beta.10
     '@unocss/nuxt': ^66.1.0-beta.10
     '@vite-pwa/nuxt': ^1.0.0
