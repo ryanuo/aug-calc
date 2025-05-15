@@ -2,7 +2,6 @@
 import type { Transaction } from './type'
 import { numberToFixed, preciseAdd, preciseDiv, preciseMul, preciseSub } from '@ryanuo/utils'
 import { useStorage } from '@vueuse/core'
-import Decimal from 'decimal.js'
 import { reactive, ref, watch } from 'vue'
 import { FEEPROCENTAGE } from '~/constants'
 
